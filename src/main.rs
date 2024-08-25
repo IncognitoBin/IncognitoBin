@@ -1,6 +1,12 @@
+mod db;
+
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 use std::collections::VecDeque;
+use rusqlite::{Connection, Result};
+use std::thread::spawn;
+use crate::db::init_db;
+
 const SPLIT_SIZE: u16 = 30000;
 struct Chunk {
     id: u16,
@@ -8,6 +14,8 @@ struct Chunk {
     end: u128,
     size: u8,
 }
+// 0: Increment
+// 1: Update
 struct DbOperation {
     chunk: Chunk,
     operation: u8,
@@ -39,7 +47,6 @@ fn upgrade_chunk(chunk_to_index: usize) {
             size :chunk.size
         }
     })
-
 }
 
 fn init(start_id_size: u8) {
@@ -60,7 +67,9 @@ fn init(start_id_size: u8) {
         });
     }
 }
-fn main() {
+fn main() -> Result<()>{
+    let conn = init_db("chunks.db")?;
     init(5);
     upgrade_chunk(0);
+    Ok(())
 }

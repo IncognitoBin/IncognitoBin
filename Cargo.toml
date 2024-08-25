@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 once_cell = "1.19.0"
+rusqlite = { version = "0.32.0", features = ["bundled"] }
