@@ -13,23 +13,22 @@ lazy_static! {
 }
 fn upgrade_chunk(chunk_to_index: usize) {
     let mut chunks = CHUNKS.lock().unwrap();
-    chunks[chunk_to_index].size += 1;
-    let start: u128 = 62_u128.pow(chunks[chunk_to_index].size as u32 -1);
-    let end: u128 = 62_u128.pow(chunks[chunk_to_index].size as u32) - 1;
-    let chunk_size: u128 = (end - start) / SPLIT_SIZE as u128;
-    chunks[chunk_to_index].start = start + chunk_size * chunks[chunk_to_index].size as u128;
-    chunks[chunk_to_index].end = if chunks[chunk_to_index].size as u16 == SPLIT_SIZE - 1 {
-        end
-    } else {
-        start + chunk_size * chunks[chunk_to_index].size as u128 + chunk_size - 1
-    };
-    println!("start : {}\tend:{}",chunks[chunk_to_index].start,chunks[chunk_to_index].end);
-
+    if(chunks[chunk_to_index].start==chunks[chunk_to_index].end){
+        chunks[chunk_to_index].size += 1;
+        let start: u128 = 62_u128.pow(chunks[chunk_to_index].size as u32 -1);
+        let end: u128 = 62_u128.pow(chunks[chunk_to_index].size as u32) - 1;
+        let chunk_size: u128 = (end - start) / SPLIT_SIZE as u128;
+        chunks[chunk_to_index].start = start + chunk_size * chunks[chunk_to_index].size as u128;
+        chunks[chunk_to_index].end = if chunks[chunk_to_index].size as u16 == SPLIT_SIZE - 1 {
+            end
+        } else {
+            start + chunk_size * chunks[chunk_to_index].size as u128 + chunk_size - 1
+        };
+    }
 }
 fn init(start_id_size: u8) {
     let mut chunks = CHUNKS.lock().unwrap();
     let start: u128 = 62_u128.pow(start_id_size as u32 - 1);
-    println!("{}",start);
     let end: u128 = 62_u128.pow(start_id_size as u32) - 1;
     let chunk_size: u128 = (end - start) / SPLIT_SIZE as u128;
     for i in 0..SPLIT_SIZE {
