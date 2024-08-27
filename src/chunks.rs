@@ -51,3 +51,19 @@ pub fn init(start_id_size: u8) {
         });
     }
 }
+fn upgrade_chunk(chunk_to_index: usize) {
+    let mut chunks = CHUNKS.write().unwrap();
+    let chunk = &mut chunks[chunk_to_index];
+    if chunk.start == chunk.end {
+        chunk.size += 1;
+        let start: u128 = 62_u128.pow(chunk.size as u32 - 1);
+        let end: u128 = 62_u128.pow(chunk.size as u32) - 1;
+        let chunk_size: u128 = (end - start) / SPLIT_SIZE as u128;
+        chunk.start = start + chunk_size * chunk.size as u128;
+        chunk.end = if chunk.size as u16 == SPLIT_SIZE - 1 {
+            end
+        } else {
+            start + chunk_size * chunk.size as u128 + chunk_size - 1
+        };
+    }
+}
