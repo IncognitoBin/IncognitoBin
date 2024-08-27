@@ -1,10 +1,11 @@
 use std::fs::File;
-use std::sync::{Mutex, RwLock};
+use std::sync::{RwLock};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use crate::SPLIT_SIZE;
-use std::io::{ErrorKind, Result};
+use std::io::{BufWriter, ErrorKind, Result, Write};
 use std::io::BufReader;
+
 #[derive(Serialize, Deserialize, Clone,Debug)]
 pub struct Chunk {
     pub(crate) id: u16,
@@ -51,10 +52,10 @@ pub fn init(start_id_size: u8) {
         });
     }
 }
-fn upgrade_chunk(chunk_to_index: usize) {
+pub fn upgrade_chunk(chunk_to_index: usize) {
     let mut chunks = CHUNKS.write().unwrap();
     let chunk = &mut chunks[chunk_to_index];
-    if chunk.start == chunk.end {
+    if chunk.start == chunk.start && chunk.size < 21 {
         chunk.size += 1;
         let start: u128 = 62_u128.pow(chunk.size as u32 - 1);
         let end: u128 = 62_u128.pow(chunk.size as u32) - 1;
@@ -66,4 +67,12 @@ fn upgrade_chunk(chunk_to_index: usize) {
             start + chunk_size * chunk.size as u128 + chunk_size - 1
         };
     }
+}
+pub fn store_chunks() -> Result<()> {
+    let file = File::create("data.json")?;
+    let mut writer = BufWriter::new(file);
+    let chunks = CHUNKS.read().unwrap();
+    serde_json::to_writer(&mut writer, &*chunks)?;
+    writer.flush()?;
+    Ok(())
 }
