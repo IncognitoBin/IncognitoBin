@@ -1,6 +1,6 @@
 FROM rust:1.80.1 AS build
 WORKDIR /app
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
 COPY src ./src
 RUN cargo build --release
 FROM debian:stable-slim

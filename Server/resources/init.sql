@@ -2,7 +2,7 @@
 CREATE KEYSPACE IF NOT EXISTS xsnippet_keyspace
 WITH replication = {
     'class': 'SimpleStrategy',
-    'replication_factor': 3
+    'replication_factor': 1
 };
 
 USE xsnippet_keyspace;

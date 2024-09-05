@@ -1,3 +1,5 @@
 /Worker/data.json
 /Worker/target/
+/Worker/Cargo.lock
 /Server/target/
+/Server/Cargo.lock

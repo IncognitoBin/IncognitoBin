@@ -1,12 +1,10 @@
 use std::fs;
 use scylla::{Session};
 
-pub async fn run_query(session: &Session, query: &str) {
+async fn run_query(session: &Session, query: &str) {
     if !query.trim().is_empty() {
-        if let Err(e) = session.query(query, &[]).await {
+        if let Err(e) = session.query_unpaged(query, &[]).await {
             eprintln!("Failed to execute query: {}. Error: {:?}", query, e);
-        } else {
-            println!("Executed query: {} -------- Done", query);
         }
     }
 }

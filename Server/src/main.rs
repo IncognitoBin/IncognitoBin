@@ -1,16 +1,15 @@
 use actix_web::{App, HttpServer};
 use scylla::{Session, SessionBuilder};
-
 mod api;
 mod db;
 
 use crate::api::{create_paste, get_paste, remove_paste};
-use crate::db::initialize_schema;
+use crate::db::init::initialize_schema;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let session: Session = SessionBuilder::new()
-        .known_node("127.0.0.1")  // Replace with your ScyllaDB node IP
+        .known_node("127.0.0.1")
         .build()
         .await
         .expect("Failed to connect to ScyllaDB");
