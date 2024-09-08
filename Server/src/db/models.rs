@@ -16,7 +16,7 @@ pub(crate) struct UserByToken {
     user_id: Uuid,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize,FromRow)]
 pub(crate) struct PasteById {
     pub(crate) paste_id: Uuid,
     pub(crate) title: String,
@@ -27,12 +27,6 @@ pub(crate) struct PasteById {
     pub(crate) expire: Option<DateTime<Utc>>,
     pub(crate) burn: bool,
     pub(crate) user_id: Option<Uuid>,
-}
-
-#[derive(Debug, Serialize, Deserialize,FromRow)]
-pub(crate) struct PastesByUserId {
-    user_id: Uuid,
-    paste_id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize,FromRow)]
