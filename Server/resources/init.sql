@@ -44,3 +44,7 @@ CREATE TABLE IF NOT EXISTS expire_date (
     minute INT,
     PRIMARY KEY (year, month, day, hour, minute)
 );
+CREATE TABLE paste_view_counts (
+    paste_id UUID PRIMARY KEY,
+    view_count COUNTER
+);
