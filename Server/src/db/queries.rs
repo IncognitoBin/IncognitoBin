@@ -90,7 +90,7 @@ pub async fn increment_view_count_by_paste_id(session: &Session, paste_id: Uuid)
         .await?;
     Ok(())
 }
-async fn insert_user_by_id(session: &Session, user: &UserById) -> Result<()> {
+pub async fn insert_user_by_id(session: &Session, user: &UserById) -> Result<()> {
     session
         .query_unpaged(
             "INSERT INTO user_by_id (user_id, username, user_token) VALUES (?, ?, ?)",
@@ -100,12 +100,43 @@ async fn insert_user_by_id(session: &Session, user: &UserById) -> Result<()> {
     Ok(())
 }
 
-async fn insert_user_by_token(session: &Session, user: &UserByToken) -> Result<()> {
+pub async fn insert_user_by_token(session: &Session, user: &UserByToken) -> Result<()> {
     session
         .query_unpaged(
             "INSERT INTO user_by_token (user_token, user_id) VALUES (?, ?)",
             (&user.user_token, user.user_id),
         )
+        .await?;
+    Ok(())
+}
+pub async fn insert_paste(session: &Session, paste: &PasteById) -> Result<()> {
+    let query = "INSERT INTO paste_by_id (
+        paste_id, title, content, syntax, password, encrypted, expire, burn, user_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    session
+        .query_unpaged(
+            query,
+            (
+                paste.paste_id,
+                &paste.title,
+                &paste.content,
+                &paste.syntax,
+                &paste.password,
+                paste.encrypted,
+                paste.expire,
+                paste.burn,
+                paste.user_id,
+            ),
+        )
+        .await?;
+
+    Ok(())
+}
+pub async fn insert_paste_by_user_id(session: &Session, user_id: Uuid, paste_id: Uuid) -> Result<()> {
+    let query = "INSERT INTO pastes_by_user_id (user_id, paste_id) VALUES (?, ?)";
+    session
+        .query_unpaged(query, (user_id, paste_id))
         .await?;
     Ok(())
 }
