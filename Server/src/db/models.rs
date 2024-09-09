@@ -12,8 +12,8 @@ pub(crate) struct UserById {
 
 #[derive(Debug, Serialize, Deserialize,FromRow)]
 pub(crate) struct UserByToken {
-    user_token: String,
-    user_id: Uuid,
+    pub(crate) user_token: String,
+    pub(crate) user_id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize,FromRow)]

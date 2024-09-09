@@ -2,7 +2,7 @@ use anyhow::Result;
 use futures::TryStreamExt;
 use scylla::transport::session::Session;
 use uuid::Uuid;
-use crate::db::models::{PasteById, UserById};
+use crate::db::models::{PasteById, UserById, UserByToken};
 use scylla::frame::value::Counter;
 
 pub async fn get_user_by_id(session: &Session,userid:Uuid) -> Result<Option<UserById>> {
@@ -86,6 +86,25 @@ pub async fn increment_view_count_by_paste_id(session: &Session, paste_id: Uuid)
             SET view_count = view_count + 1
             WHERE paste_id = ?;",
             (paste_id,)
+        )
+        .await?;
+    Ok(())
+}
+async fn insert_user_by_id(session: &Session, user: &UserById) -> Result<()> {
+    session
+        .query_unpaged(
+            "INSERT INTO user_by_id (user_id, username, user_token) VALUES (?, ?, ?)",
+            (user.user_id, &user.username, &user.user_token),
+        )
+        .await?;
+    Ok(())
+}
+
+async fn insert_user_by_token(session: &Session, user: &UserByToken) -> Result<()> {
+    session
+        .query_unpaged(
+            "INSERT INTO user_by_token (user_token, user_id) VALUES (?, ?)",
+            (&user.user_token, user.user_id),
         )
         .await?;
     Ok(())
