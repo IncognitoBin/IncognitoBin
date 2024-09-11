@@ -1,10 +1,14 @@
+use std::sync::Arc;
 use actix_web::{App, HttpServer};
 use scylla::{Session, SessionBuilder};
+use uuid::Uuid;
+
 mod api;
 mod db;
 
 use crate::api::{create_paste, get_paste, remove_paste};
 use crate::db::init::initialize_schema;
+use crate::db::queries::{ get_paste_by_id, get_pastes_by_userid, get_view_count_by_paste_id, increment_view_count_by_paste_id};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -16,6 +20,8 @@ async fn main() -> std::io::Result<()> {
     if let Err(err) = initialize_schema(&session, "resources/init.sql").await {
         eprintln!("Failed to initialize schema: {:?}", err);
     }
+    let session = Arc::new(session);
+
     println!("Starting Now");
     HttpServer::new(|| {
         App::new()
