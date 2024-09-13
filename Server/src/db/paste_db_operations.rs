@@ -1,5 +1,4 @@
 use anyhow::Result;
-use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use crate::db::models::{PasteById, UserById, UserByToken};
 use scylla::frame::value::Counter;

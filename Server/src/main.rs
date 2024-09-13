@@ -1,14 +1,12 @@
 use std::sync::Arc;
-use actix_web::{App, HttpServer};
+use actix_web::{web, App, HttpServer};
 use scylla::{Session, SessionBuilder};
-use uuid::Uuid;
-
 mod api;
 mod db;
 
-use crate::api::{create_paste, get_paste, remove_paste};
+use crate::api::{get_paste};
 use crate::db::init::initialize_schema;
-use crate::db::queries::{ get_paste_by_id, get_pastes_by_userid, get_view_count_by_paste_id, increment_view_count_by_paste_id};
+use crate::db::scylla_db_operations::ScyllaDbOperations;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -21,13 +19,13 @@ async fn main() -> std::io::Result<()> {
         eprintln!("Failed to initialize schema: {:?}", err);
     }
     let session = Arc::new(session);
+    let db_ops = web::Data::new(ScyllaDbOperations::new(session.clone()));
 
     println!("Starting Now");
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         App::new()
+            .app_data(db_ops.clone())
             .service(get_paste)
-            .service(create_paste)
-            .service(remove_paste)
     })
         .bind(("0.0.0.0", 8181))?
         .run()

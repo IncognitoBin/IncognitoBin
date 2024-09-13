@@ -1,6 +1,4 @@
 pub mod init;
 pub mod models;
-pub mod queries;
-
-mod PasteDbOperations;
-mod ScyllaDbOperations;
+pub mod paste_db_operations;
+pub mod scylla_db_operations;

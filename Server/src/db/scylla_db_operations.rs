@@ -5,7 +5,7 @@ use uuid::Uuid;
 use anyhow::Result;
 use scylla::frame::value::Counter;
 use crate::db::models::{PasteById, UserById, UserByToken};
-use crate::db::PasteDbOperations::PasteDbOperations;
+use crate::db::paste_db_operations::PasteDbOperations;
 pub struct ScyllaDbOperations {
     session: Arc<Session>,
 }

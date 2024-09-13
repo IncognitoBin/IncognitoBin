@@ -1,25 +1,37 @@
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
-#[derive(Serialize, Deserialize)]
-struct Paste {
-    id: u32,
-    content: String,
-}
-#[get("/paste")]
-pub async fn get_paste() -> impl Responder {
-    let paste = Paste {
-        id: 1,
-        content: "X".to_string(),
-    };
-    web::Json(paste)
+use actix_web::{get, web, HttpResponse, Responder};
+use serde::{Serialize};
+use uuid::Uuid;
+use crate::db::models::PasteById;
+use crate::db::paste_db_operations::PasteDbOperations;
+use crate::db::scylla_db_operations::ScyllaDbOperations;
+
+#[derive(Serialize)]
+struct PasteResponse {
+    paste: PasteById,
+    views: i64,
 }
 
-#[post("/paste")]
-pub async fn create_paste(paste: web::Json<Paste>) -> impl Responder {
-    HttpResponse::Ok().json(paste.into_inner())
-}
+#[get("/paste/{paste_id}")]
+async fn get_paste(
+    db: web::Data<ScyllaDbOperations>,
+    paste_id: web::Path<Uuid>
+) -> impl Responder {
+    let paste_id = paste_id.into_inner();
 
-#[delete("/paste")]
-pub async fn remove_paste() -> impl Responder {
-    format!("{}", 1)
+    let paste_result = db.get_paste_by_id(paste_id).await;
+    db.increment_view_count_by_paste_id(paste_id).await.expect("Can't Increment Views");
+    let view_count_result = db.get_view_count_by_paste_id(paste_id).await;
+
+    match (paste_result, view_count_result) {
+        (Ok(Some(paste)), Ok(Some(views))) => {
+
+            let response = PasteResponse {
+                paste,
+                views: views.0,
+            };
+            HttpResponse::Ok().json(response)
+        },
+        (Ok(None), _) => HttpResponse::NotFound().finish(),
+        _ => HttpResponse::InternalServerError().finish(),
+    }
 }
