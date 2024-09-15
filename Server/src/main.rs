@@ -26,6 +26,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(db_ops.clone())
             .service(get_paste)
+            .service(create_paste)
+
     })
         .bind(("0.0.0.0", 8181))?
         .run()
