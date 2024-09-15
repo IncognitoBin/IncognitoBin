@@ -3,8 +3,9 @@ use actix_web::{web, App, HttpServer};
 use scylla::{Session, SessionBuilder};
 mod api;
 mod db;
+mod view_model;
 
-use crate::api::{get_paste};
+use crate::api::{create_paste, get_paste};
 use crate::db::init::initialize_schema;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 
@@ -27,7 +28,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(db_ops.clone())
             .service(get_paste)
             .service(create_paste)
-
     })
         .bind(("0.0.0.0", 8181))?
         .run()
