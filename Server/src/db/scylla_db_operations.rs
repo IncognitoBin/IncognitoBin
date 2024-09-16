@@ -15,7 +15,7 @@ impl ScyllaDbOperations {
         Self { session }
     }
 }
-
+// TODO: Batch Query For Create Paste
 #[async_trait::async_trait]
 impl PasteDbOperations for ScyllaDbOperations {
     async fn get_user_by_id(&self, userid: Uuid) -> Result<Option<UserById>> {

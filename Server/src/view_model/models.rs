@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -11,7 +10,6 @@ pub struct CreatePasteRequest {
     pub(crate) encrypted: bool,
     pub(crate) expire: Option<i64>,
     pub(crate) burn: Option<bool>,
-    pub(crate) user_id: Option<Uuid>,
 }
 
 #[derive(Serialize)]
