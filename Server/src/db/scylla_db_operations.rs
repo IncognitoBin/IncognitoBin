@@ -156,6 +156,15 @@ impl PasteDbOperations for ScyllaDbOperations {
         Ok(())
     }
 
+    async fn delete_paste_by_id(&self, paste_id: &Uuid) -> Result<()> {
+        self.session
+            .query_unpaged(
+                "DELETE FROM paste_by_id WHERE paste_id = ?",
+                (paste_id,),
+            )
+            .await?;
+        Ok(())
+    }
     async fn check_paste_by_userid(&self, userid: &Uuid,paste_id:&Uuid) -> Result<bool>{
         let mut iter = self.session
             .query_iter(

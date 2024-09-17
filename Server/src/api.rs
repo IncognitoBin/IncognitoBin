@@ -4,14 +4,19 @@ use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 use crate::view_model::models::{CreatePasteRequest, CreatePasteResponse};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serde::Serialize;
 use uuid::Uuid;
 use crate::helpers::{extract_user_id, generate_unique_id, is_valid_bcrypt_hash};
 
 #[derive(Serialize)]
 struct PasteResponse {
-    paste: PasteById,
+    title: String,
+    content: String,
+    syntax: Option<String>,
+    encrypted: bool,
+    expire: Option<DateTime<Utc>>,
+    username:Option<String>,
     views: i64,
 }
 #[derive(Serialize)]
@@ -25,20 +30,69 @@ async fn get_paste(
     paste_id: web::Path<Uuid>,
 ) -> impl Responder {
     let paste_id = paste_id.into_inner();
-
-    let paste_result = db.get_paste_by_id(paste_id).await;
-    db.increment_view_count_by_paste_id(paste_id).await.expect("Can't Increment Views");
-    let view_count_result = db.get_view_count_by_paste_id(paste_id).await;
-    match (paste_result, view_count_result) {
-        (Ok(Some(paste)), Ok(Some(views))) => {
-            let response = PasteResponse {
-                paste,
-                views: views.0,
+    match db.get_paste_by_id(paste_id).await {
+        Ok(Some(paste)) => {
+            // TODO : Password Think about Zero knowledge proof method
+            // Expiration
+            if paste.expire.is_some(){
+                if paste.expire.unwrap()<Utc::now(){
+                    if paste.user_id != None {
+                        db.delete_paste_by_user_id(&paste_id,&paste.user_id.unwrap()).await.expect("Can't Delete The Paste");
+                    }else{
+                        db.delete_paste_by_id(&paste_id).await.expect("Can't Delete The Paste");
+                    }
+                    return HttpResponse::NotFound().finish();
+                }
+            }
+            let mut response = PasteResponse {
+                title: paste.title,
+                content: paste.content,
+                syntax: paste.syntax,
+                encrypted: paste.encrypted,
+                expire: paste.expire,
+                username:None,
+                views: 0,
             };
+            // Username
+            if paste.user_id.is_some(){
+                match db.get_user_by_id(paste.user_id.unwrap()).await {
+                    Ok(Some(user)) => {response.username=Some(user.username)}
+                    Err(_) => { return HttpResponse::InternalServerError().finish()}
+                    _ => {}
+                }
+            }
+            // Burn
+            if paste.burn {
+                if paste.user_id != None {
+                    db.delete_paste_by_user_id(&paste_id,&paste.user_id.unwrap()).await.expect("Can't Delete The Paste");
+                }else{
+                    db.delete_paste_by_id(&paste_id).await.expect("Can't Delete The Paste");
+                }
+            }else{// Increment
+
+                db.increment_view_count_by_paste_id(paste_id).await.expect("Cant' Increment Views");
+                // Views
+                match db.get_view_count_by_paste_id(paste_id).await {
+                    Ok(Some(views)) => {
+                        response.views= views.0;
+                    }
+                    Ok(None) => {
+                        return HttpResponse::InternalServerError().finish()
+                    }
+                    Err(_) => {
+                        return HttpResponse::InternalServerError().finish()
+                    }
+                }
+            }
+
+
+
             HttpResponse::Ok().json(response)
         }
-        (Ok(None), _) => HttpResponse::NotFound().finish(),
-        _ => HttpResponse::InternalServerError().finish(),
+        Ok(None) => HttpResponse::NotFound().finish(), // Paste not found
+        Err(_) => {
+            HttpResponse::InternalServerError().finish()
+        }
     }
 }
 
