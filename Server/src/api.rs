@@ -3,11 +3,11 @@ use crate::db::models::PasteById;
 use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 use crate::view_model::models::{CreatePasteRequest, CreatePasteResponse};
-use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
-use anyhow::{Context, Result};
+use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::{Duration, Utc};
 use serde::Serialize;
 use uuid::Uuid;
+use crate::helpers::{extract_user_id, generate_unique_id, is_valid_bcrypt_hash};
 
 #[derive(Serialize)]
 struct PasteResponse {
@@ -18,6 +18,7 @@ struct PasteResponse {
 struct ErrorResponse {
     error: String,
 }
+
 #[get("/paste/{paste_id}")]
 async fn get_paste(
     db: web::Data<ScyllaDbOperations>,
@@ -41,36 +42,8 @@ async fn get_paste(
     }
 }
 
-async fn generate_unique_id() -> Result<Uuid> {
-    let response = reqwest::get("http://localhost:8080/id")
-        .await
-        .context("Failed to connect to ID generation service")?;
 
-    if !response.status().is_success() {
-        return Err(anyhow::anyhow!("ID generation service returned an error: {}", response.status()));
-    }
 
-    let id: u128 = response.text().await
-        .context("Failed to read response from ID generation service")?
-        .parse()
-        .context("Failed to parse ID as u128")?;
-
-    Ok(Uuid::from_u128(id))
-}
-fn is_valid_bcrypt_hash(hash: String) -> Option<u8> {
-    if hash.len() != 60 {
-        return None;
-    }
-    if hash.starts_with("$2b$") {
-        let parts: Vec<&str> = hash.split('$').collect();
-        if parts.len() > 2 {
-            if let Ok(cost) = parts[2].parse::<u8>() {
-                return Some(cost);
-            }
-        }
-    }
-    None
-}
 #[post("/paste")]
 async fn create_paste(
     req: HttpRequest,
@@ -157,6 +130,30 @@ async fn create_paste(
             }
             HttpResponse::Created().json(CreatePasteResponse { paste_id })
         }
+        Err(_) => HttpResponse::InternalServerError().finish(),
+    }
+}
+#[delete("/paste/{paste_id}")]
+async fn delete_paste(
+    req: HttpRequest,
+    db: web::Data<ScyllaDbOperations>,
+    config: web::Data<Config>,
+    paste_id:web::Path<Uuid>
+) -> impl Responder {
+    // PasteID
+    let paste_id = paste_id.into_inner();
+    // UserID
+    let user_id = match extract_user_id(&req, &db, &config).await {
+        Some(id) => id,
+        None => return HttpResponse::Unauthorized().json(ErrorResponse { error: "Invalid token".to_string() }),
+    };
+    // Check + Delete
+    match db.check_paste_by_userid(&user_id, &paste_id).await {
+        Ok(true) => match db.delete_paste_by_user_id(&paste_id, &user_id).await {
+            Ok(_) => HttpResponse::Ok().finish(),
+            Err(_) => HttpResponse::InternalServerError().finish(),
+        },
+        Ok(false) => HttpResponse::NotFound().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
 }

@@ -5,8 +5,10 @@ use scylla::{Session, SessionBuilder};
 mod db;
 mod view_model;
 mod config;
+mod helpers;
+
 use config::Config;
-use crate::api::{create_paste, get_paste};
+use crate::api::{create_paste, delete_paste, get_paste};
 use crate::db::init::initialize_schema;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 
@@ -36,6 +38,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(config.clone()).clone())
             .service(get_paste)
             .service(create_paste)
+            .service(delete_paste)
     })
         .bind(("0.0.0.0", 8181))?
         .run()

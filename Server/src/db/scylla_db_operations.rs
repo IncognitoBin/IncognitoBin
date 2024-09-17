@@ -3,6 +3,7 @@ use std::sync::Arc;
 use futures::TryStreamExt;
 use uuid::Uuid;
 use anyhow::Result;
+use scylla::batch::Batch;
 use scylla::frame::value::Counter;
 use crate::db::models::{PasteById, UserById, UserByToken};
 use crate::db::paste_db_operations::PasteDbOperations;
@@ -15,7 +16,7 @@ impl ScyllaDbOperations {
         Self { session }
     }
 }
-// TODO: Batch Query For Create Paste
+// TODO: Batch Query For Create Paste -> https://github.com/scylladb/scylla-rust-driver/blob/main/docs/source/queries/batch.md
 #[async_trait::async_trait]
 impl PasteDbOperations for ScyllaDbOperations {
     async fn get_user_by_id(&self, userid: Uuid) -> Result<Option<UserById>> {
@@ -154,5 +155,36 @@ impl PasteDbOperations for ScyllaDbOperations {
             .await?;
         Ok(())
     }
+
+    async fn check_paste_by_userid(&self, userid: &Uuid,paste_id:&Uuid) -> Result<bool>{
+        let mut iter = self.session
+            .query_iter(
+                "SELECT paste_id
+             FROM pastes_by_user_id WHERE user_id = ? and paste_id = ?;",
+                (userid,paste_id,),
+            )
+            .await?
+            .into_typed::<(Uuid,)>();
+
+
+        while let Some((_, )) = iter.try_next().await? {
+            return Ok(true);
+        }
+        Ok(false)
+    }
+    async fn delete_paste_by_user_id(&self, paste_id: &Uuid,user_id:&Uuid) -> Result<()> {
+        let mut batch: Batch = Default::default();
+        // paste_by_id
+        batch.append_statement("DELETE FROM paste_by_id WHERE paste_id = ?");
+        // pastes_by_user_id
+        batch.append_statement("DELETE FROM pastes_by_user_id WHERE user_id = ? and paste_id = ?");
+
+        let prepared_batch: Batch = self.session.prepare_batch(&batch).await?;
+        let batch_values = ((paste_id,),
+                            (user_id,paste_id,));
+        self.session.batch(&prepared_batch, batch_values).await?;
+        Ok(())
+    }
+
 
 }
