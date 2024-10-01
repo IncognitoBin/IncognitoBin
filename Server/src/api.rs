@@ -7,15 +7,15 @@ use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Duration, Utc};
 use serde::Serialize;
 use uuid::Uuid;
-use crate::helpers::{extract_user_id, generate_unique_id, is_valid_bcrypt_hash};
+use crate::helpers::{extract_user_id, generate_unique_id};
 
 #[derive(Serialize)]
 struct PasteResponse {
     title: String,
     content: String,
     syntax: Option<String>,
-    encrypted: bool,
     expire: Option<DateTime<Utc>>,
+    password: bool,
     username:Option<String>,
     views: i64,
 }
@@ -32,7 +32,6 @@ async fn get_paste(
     let paste_id = paste_id.into_inner();
     match db.get_paste_by_id(paste_id).await {
         Ok(Some(paste)) => {
-            // TODO : Password Think about Zero knowledge proof method
             // Expiration
             if paste.expire.is_some(){
                 if paste.expire.unwrap()<Utc::now(){
@@ -48,8 +47,8 @@ async fn get_paste(
                 title: paste.title,
                 content: paste.content,
                 syntax: paste.syntax,
-                encrypted: paste.encrypted,
                 expire: paste.expire,
+                password: paste.password,
                 username:None,
                 views: 0,
             };
@@ -140,17 +139,6 @@ async fn create_paste(
             }
         }
     }
-    // Password
-    if paste_data.password.is_some() {
-        match is_valid_bcrypt_hash(paste_data.password.clone().unwrap_or("".to_string())) {
-            Some(cost) => {
-                if cost != config.bcrypt_rounds {
-                    return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Bcrypt Rounds Must Be {} ", config.bcrypt_rounds).to_string() });
-                }
-            }
-            None => return HttpResponse::BadRequest().json(ErrorResponse { error: "Invalid bcrypt hash.".to_string() }),
-        }
-    }
     // Syntax
     if paste_data.syntax.is_some() && paste_data.syntax.clone().unwrap_or("".to_string()).len() > config.max_syntax_length as usize {
         return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Syntax must not exceed {} characters", config.max_syntax_length).to_string() });
@@ -169,8 +157,7 @@ async fn create_paste(
         title: paste_data.title.clone(),
         content: paste_data.content.clone(),
         syntax: paste_data.syntax.clone(),
-        password: paste_data.password.clone(),
-        encrypted: paste_data.encrypted,
+        password: paste_data.password,
         expire: expiration_time,
         burn: paste_data.burn.unwrap_or(false),
         user_id,

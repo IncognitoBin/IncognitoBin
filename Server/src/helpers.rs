@@ -6,20 +6,6 @@ use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 
 
-pub fn is_valid_bcrypt_hash(hash: String) -> Option<u8> {
-    if hash.len() != 60 {
-        return None;
-    }
-    if hash.starts_with("$2b$") {
-        let parts: Vec<&str> = hash.split('$').collect();
-        if parts.len() > 2 {
-            if let Ok(cost) = parts[2].parse::<u8>() {
-                return Some(cost);
-            }
-        }
-    }
-    None
-}
 pub async fn generate_unique_id() -> anyhow::Result<Uuid> {
     let response = reqwest::get("http://localhost:8080/id")
         .await

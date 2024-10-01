@@ -23,8 +23,7 @@ CREATE TABLE IF NOT EXISTS paste_by_id (
     title TEXT,
     content TEXT,
     syntax TEXT,
-    password TEXT,
-    encrypted BOOLEAN,
+    password BOOLEAN,
     expire TIMESTAMP,
     burn BOOLEAN,
     user_id UUID
