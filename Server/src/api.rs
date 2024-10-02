@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::db::models::PasteById;
+use crate::db::models::{PasteById, UserById};
 use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 use crate::view_model::models::{CreatePasteRequest, CreatePasteResponse};
@@ -197,4 +197,25 @@ async fn delete_paste(
         Ok(false) => HttpResponse::NotFound().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
+}
+#[get("/user")]
+async fn new_user(
+    req: HttpRequest,
+    db: web::Data<ScyllaDbOperations>,
+    config: web::Data<Config>,
+) -> impl Responder {
+    // RateLimit
+    // Get Random ID
+    let user_uuid = Uuid::new_v4();
+    let user = UserById {
+        user_id: Uuid::new_v4(), // Generate a new UUID
+        user_token: "".to_string(),
+        username: "".to_string(),
+    };
+    match db.insert_user_by_id(&user).await {
+        Ok(_) => {HttpResponse::Ok().json(user_uuid)}
+        Err(_) => {HttpResponse::ServiceUnavailable()}
+    }
+
+
 }
