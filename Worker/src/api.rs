@@ -1,9 +1,17 @@
 use actix_web::{get, put, web, HttpResponse, Responder};
-use crate::chunks::{add_id, retrieve_id};
+use crate::AppState;
+use crate::chunks::{add_id};
+use crate::redis_handler::dequeue;
 
 #[get("/id")]
-pub async fn get_id() -> impl Responder {
-    format!("{}", retrieve_id())
+pub async fn get_id(data: web::Data<AppState>) -> impl Responder {
+    let mut con = data.redis_client.get_connection()
+        .expect("Failed to get Redis connection");
+    match dequeue(&mut con, "paste_ids") {
+        Ok(Some(id)) => HttpResponse::Ok().body(id),
+        Ok(None) => HttpResponse::NotFound().body("No IDs available"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Redis error: {}", e)),
+    }
 }
 
 #[put("/id/{id_str}")]

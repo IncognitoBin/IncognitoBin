@@ -1,5 +1,5 @@
 [package]
-name = "x_snippet_server"
+name = "IncognitoBin_server"
 version = "0.1.0"
 edition = "2021"
 
