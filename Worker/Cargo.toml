@@ -10,3 +10,12 @@ serde = { version = "1.0.0", features = ["derive"] }
 chrono = "0.4"
 actix-web = "4"
 redis = "0.27.2"
+rand = "0.8.5"
+scylla = { version = "0.14.0" , features = [
+    "chrono-04",
+]}
+anyhow = "1.0.86"
+uuid = { version = "1.10.0", features = ["v4","serde"] }
+async-trait = "0.1.82"
+futures-util = "0.3.30"
+futures = "0.3.30"

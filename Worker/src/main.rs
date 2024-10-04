@@ -1,23 +1,38 @@
 use std::sync::Arc;
 use std::thread;
-use std::time::{Duration};
+use std::time::Duration;
 use actix_web::{web, App, HttpServer};
+use scylla::{Session, SessionBuilder};
 
-mod chunks;
+mod paste_ids;
 mod api;
 mod redis_handler;
+mod db;
+mod user_auth;
 
 use crate::api::{get_id, put_id};
-use crate::redis_handler::{queue_length, setup_enqueue};
+use crate::db::db_operations_iml::ScyllaDbOperations;
+use crate::redis_handler::{queue_length, read_all, add_paste_ids_enqueue, };
+use crate::user_auth::handlers::{ids_queue_handler, tokens_queue_handler};
+
 struct AppState {
     redis_client: Arc<redis::Client>,
 }
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let session: Session = SessionBuilder::new()
+        .known_node("127.0.0.1")
+        .build()
+        .await
+        .expect("Failed to connect to ScyllaDB");
+    let session = Arc::new(session);
+    let db_ops = web::Data::new(ScyllaDbOperations::new(session.clone()));
+
     let client = Arc::new(redis::Client::open("redis://127.0.0.1/")
         .expect("Failed to open Redis client"));
-    let mut con = client.get_connection().expect("Failed to get Redis connection");
-    match chunks::load() {
+
+    match paste_ids::load() {
         Ok(()) => println!("Data loaded successfully!"),
         Err(e) => eprintln!("Failed to load data: {}", e),
     }
@@ -26,19 +41,43 @@ async fn main() -> std::io::Result<()> {
     thread::spawn(|| {
         loop {
             thread::sleep(Duration::from_secs(15));
-            chunks::store_chunks().expect("Can't Store The File!");
+            paste_ids::store_chunks().expect("Can't Store The File!");
         }
     });
-    // Add To Queue
+
+    // Add Paste IDs To Queue
+    let redis_paste_ids_client = client.clone();
+    let scylla_users_tokens_session = session.clone();
     thread::spawn(move || {
+        let mut con = redis_paste_ids_client.get_connection().expect("Failed to get Redis connection for paste_ids");
+        let db_ops = ScyllaDbOperations::new(scylla_users_tokens_session);
         loop {
             let length = queue_length(&mut con, "paste_ids").expect("Redis: Failed to get queue count");
-            if length<1_000_000 {
-                setup_enqueue(&mut con,"paste_ids",1_000_000-length).expect("Redis: Can't Insert To Queue");
+            if length < 500_000 {
+                add_paste_ids_enqueue(&mut con, "paste_ids", 1_000_000 - length).expect("Redis: Can't Insert To Queue");
             }
-            thread::sleep(Duration::from_secs(5));
+            thread::sleep(Duration::from_secs(1));
         }
     });
+
+    // Add Tokens To Queue
+    let redis_users_tokens_client = client.clone();
+    let scylla_users_token_session = session.clone();
+    thread::spawn(move || {
+        let con = redis_users_tokens_client.get_connection().expect("Failed to get Redis connection for users_tokens");
+        let db_ops = ScyllaDbOperations::new(scylla_users_token_session);
+        tokens_queue_handler(con,&db_ops)
+    });
+
+    // Add UsersId To Queue
+    let users_tokens_client = client.clone();
+    let scylla_users_ids_session = session.clone();
+    thread::spawn(move || {
+        let con = users_tokens_client.get_connection().expect("Failed to get Redis connection for users_tokens");
+        let db_ops = ScyllaDbOperations::new(scylla_users_ids_session);
+        ids_queue_handler(con,&db_ops)
+    });
+
     let app_state = web::Data::new(AppState {
         redis_client: client.clone(),
     });

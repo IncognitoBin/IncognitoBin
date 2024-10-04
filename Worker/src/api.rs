@@ -1,6 +1,6 @@
 use actix_web::{get, put, web, HttpResponse, Responder};
 use crate::AppState;
-use crate::chunks::{add_id};
+use crate::paste_ids::{add_id};
 use crate::redis_handler::dequeue;
 
 #[get("/id")]
