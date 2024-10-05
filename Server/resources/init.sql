@@ -1,11 +1,11 @@
 
-CREATE KEYSPACE IF NOT EXISTS xsnippet_keyspace
+CREATE KEYSPACE IF NOT EXISTS incognitobin_keyspace
 WITH replication = {
     'class': 'SimpleStrategy',
     'replication_factor': 1
 };
 
-USE xsnippet_keyspace;
+USE incognitobin_keyspace;
 
 CREATE TABLE IF NOT EXISTS user_by_id (
     user_id UUID PRIMARY KEY,

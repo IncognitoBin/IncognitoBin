@@ -19,3 +19,4 @@ uuid = { version = "1.10.0", features = ["v4","serde"] }
 async-trait = "0.1.82"
 futures-util = "0.3.30"
 futures = "0.3.30"
+tokio = "1.40.0"

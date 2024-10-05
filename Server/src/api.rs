@@ -198,12 +198,13 @@ async fn delete_paste(
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
 }
+/*
 #[get("/user")]
 async fn new_user(
     req: HttpRequest,
     db: web::Data<ScyllaDbOperations>,
     config: web::Data<Config>,
-) -> impl Responder {
+) -> Box<dyn Responder> {
     // RateLimit
     // Get Random ID
     let user_uuid = Uuid::new_v4();
@@ -216,6 +217,5 @@ async fn new_user(
         Ok(_) => {HttpResponse::Ok().json(user_uuid)}
         Err(_) => {HttpResponse::ServiceUnavailable()}
     }
+*/
 
-
-}
