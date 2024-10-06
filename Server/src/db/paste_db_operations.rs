@@ -18,4 +18,5 @@ pub trait PasteDbOperations {
     async fn insert_paste_by_user_id(&self, user_id: Uuid, paste_id: Uuid) -> Result<()>;
     async fn delete_paste_by_id(&self, paste_id: &Uuid) -> Result<()>;
     async fn delete_paste_by_user_id(&self, paste_id:&Uuid, user: &Uuid) -> Result<()>;
+    async fn execute_update_token_operations(&self, old_token: String, new_token: String,user_id:&Uuid) -> Result<()>;
 }

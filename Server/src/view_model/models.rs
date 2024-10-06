@@ -10,7 +10,10 @@ pub struct CreatePasteRequest {
     pub(crate) expire: Option<i64>,
     pub(crate) burn: Option<bool>,
 }
-
+#[derive(Deserialize)]
+pub struct UserLoginRequest {
+    pub(crate) user_id: u128,
+}
 #[derive(Serialize)]
 pub struct CreatePasteResponse {
     pub(crate) paste_id: Uuid,

@@ -1,13 +1,16 @@
+
 use crate::config::Config;
 use crate::db::models::{PasteById, UserById};
 use crate::db::paste_db_operations::PasteDbOperations;
-use crate::db::scylla_db_operations::ScyllaDbOperations;
-use crate::view_model::models::{CreatePasteRequest, CreatePasteResponse};
+use crate::db::scylla_db_operations::{ScyllaDbOperations};
+use crate::view_model::models::{CreatePasteRequest, CreatePasteResponse, UserLoginRequest};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Duration, Utc};
 use serde::Serialize;
 use uuid::Uuid;
-use crate::helpers::{extract_user_id, generate_unique_id};
+use crate::{RedisAppState};
+use crate::helpers::{extract_user_id, number_text_to_uuid};
+use crate::redis_handler::dequeue;
 
 #[derive(Serialize)]
 struct PasteResponse {
@@ -97,10 +100,12 @@ async fn get_paste(
 
 
 
+
 #[post("/paste")]
 async fn create_paste(
     req: HttpRequest,
     db: web::Data<ScyllaDbOperations>,
+    redis_con: web::Data<RedisAppState>,
     config: web::Data<Config>,
     paste_data: web::Json<CreatePasteRequest>,
 ) -> impl Responder {
@@ -128,29 +133,26 @@ async fn create_paste(
         None => None,
     };
     // UserID
-    let mut user_id: Option<Uuid> = None;
-    if let Some(auth_header) = req.headers().get("Authorization") {
-        if let Ok(auth_token) = auth_header.to_str() {
-            if auth_token.len() == config.token_size as usize {
-                let get_user_token = db.get_userid_by_token(auth_token).await;
-                if get_user_token.is_ok() {
-                    user_id = get_user_token.unwrap_or(None);
-                }
-            }
-        }
-    }
+    let user_id: Option<Uuid>;
+    user_id = match extract_user_id(&req, &db, &config).await {
+        Some(id) => Option::from(id),
+        _ => {None}
+    };
     // Syntax
     if paste_data.syntax.is_some() && paste_data.syntax.clone().unwrap_or("".to_string()).len() > config.max_syntax_length as usize {
         return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Syntax must not exceed {} characters", config.max_syntax_length).to_string() });
     }
     // Get Unique ID
-    let paste_id = match generate_unique_id().await {
-        Ok(id) => id,
-        Err(e) => {
-            eprintln!("Failed to generate unique ID: {:?}", e);
-            return HttpResponse::InternalServerError().finish();
-        }
+    let mut con = match redis_con.redis_client.get_connection() {
+        Ok(conn) => conn,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
     };
+    let text_paste_id_num = match dequeue(&mut con, "paste_ids") {
+        Ok(Some(id)) => id,
+        Ok(None) => return HttpResponse::NotFound().body("No IDs in queue"),
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
+    let paste_id = number_text_to_uuid(text_paste_id_num);
     // Save In DB
     let new_paste = PasteById {
         paste_id,
@@ -198,24 +200,61 @@ async fn delete_paste(
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
 }
-/*
+
 #[get("/user")]
 async fn new_user(
-    req: HttpRequest,
     db: web::Data<ScyllaDbOperations>,
-    config: web::Data<Config>,
-) -> Box<dyn Responder> {
-    // RateLimit
-    // Get Random ID
-    let user_uuid = Uuid::new_v4();
+    redis_con: web::Data<RedisAppState>,
+) -> impl Responder {
+    // Get Unique ID
+    let mut con = match redis_con.redis_client.get_connection() {
+        Ok(conn) => conn,
+        Err(e) => return HttpResponse::InternalServerError().body(format!("Redis connection error: {}", e)),
+    };
+    let text_user_id_num = match dequeue(&mut con, "users_ids") {
+        Ok(Some(id)) => id,
+        Ok(None) => return HttpResponse::NotFound().body("No IDs in queue"),
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
+    let user_id = number_text_to_uuid(text_user_id_num);
     let user = UserById {
-        user_id: Uuid::new_v4(), // Generate a new UUID
-        user_token: "".to_string(),
+        user_id: user_id, // Generate a new UUID
+        user_token: "x".to_string(),
         username: "".to_string(),
     };
     match db.insert_user_by_id(&user).await {
-        Ok(_) => {HttpResponse::Ok().json(user_uuid)}
-        Err(_) => {HttpResponse::ServiceUnavailable()}
+        Ok(_) => HttpResponse::Ok().json(user_id),
+        Err(_) => HttpResponse::InternalServerError().finish()
     }
-*/
+}
 
+
+#[post("/user")]
+async fn user_login(
+    db: web::Data<ScyllaDbOperations>,
+    login_data: web::Json<UserLoginRequest>,
+    redis_con: web::Data<RedisAppState>,
+) -> impl Responder {
+    let user_id=Uuid::from_u128(login_data.user_id);
+    let user_old_token = match db.get_user_by_id(user_id).await {
+        Ok(user) => {
+            if user.is_none(){
+                return HttpResponse::NotFound().finish()
+            }
+            user.unwrap().user_token
+        }
+        Err(_) => {return HttpResponse::InternalServerError().finish()}
+    };
+    // Get New Token
+    let mut con = match redis_con.redis_client.get_connection() {
+        Ok(conn) => conn,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
+    let new_user_token = match dequeue(&mut con, "users_tokens") {
+        Ok(Some(id)) => id,
+        Ok(None) => return HttpResponse::NotFound().body("No IDs in queue"),
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
+    db.execute_update_token_operations(user_old_token,new_user_token.clone(),&user_id).await.unwrap();
+    HttpResponse::Ok().json(new_user_token)
+}

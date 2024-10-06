@@ -6,21 +6,11 @@ use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 
 
-pub async fn generate_unique_id() -> anyhow::Result<Uuid> {
-    let response = reqwest::get("http://localhost:8080/id")
-        .await
-        .context("Failed to connect to ID generation service")?;
-
-    if !response.status().is_success() {
-        return Err(anyhow::anyhow!("ID generation service returned an error: {}", response.status()));
-    }
-
-    let id: u128 = response.text().await
-        .context("Failed to read response from ID generation service")?
-        .parse()
-        .context("Failed to parse ID as u128")?;
-
-    Ok(Uuid::from_u128(id))
+pub fn number_text_to_uuid(number: String) -> Uuid {
+    let id: u128 =
+        number.parse()
+        .context("Failed to parse ID as u128").expect("Can't Paste text to u128");
+    Uuid::from_u128(id)
 }
 pub async fn extract_user_id(req: &HttpRequest, db: &ScyllaDbOperations, config: &Config) -> Option<Uuid> {
     if let Some(auth_header) = req.headers().get("Authorization") {

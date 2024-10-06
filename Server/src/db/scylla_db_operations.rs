@@ -1,8 +1,8 @@
-use scylla::Session;
+use scylla::{Session};
 use std::sync::Arc;
 use futures::TryStreamExt;
 use uuid::Uuid;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use scylla::batch::Batch;
 use scylla::frame::value::Counter;
 use crate::db::models::{PasteById, UserById, UserByToken};
@@ -192,6 +192,23 @@ impl PasteDbOperations for ScyllaDbOperations {
         self.session.batch(&prepared_batch, batch_values).await?;
         Ok(())
     }
+    async fn execute_update_token_operations(&self, old_token: String, new_token: String,user_id:&Uuid) -> Result<()> {
+        let mut batch: Batch = Default::default();
+        batch.append_statement("DELETE FROM user_by_token WHERE user_token = ?");
+        batch.append_statement("INSERT INTO user_by_token (user_token, user_id) VALUES (?, ?)");
+        batch.append_statement("UPDATE user_by_id SET user_token = ? WHERE user_id = ?");
 
 
+
+        let prepared_batch: Batch = self.session.prepare_batch(&batch).await?;
+        let batch_values = ((old_token,),
+                            (new_token.clone(),user_id, ),
+                            (new_token.clone(),user_id,));
+
+
+        self.session.batch(&prepared_batch, batch_values)
+            .await
+            .context("Failed to execute batch").expect("TODO: panic message");
+        Ok(())
+    }
 }
