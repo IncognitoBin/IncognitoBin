@@ -19,7 +19,6 @@ struct PasteResponse {
     syntax: Option<String>,
     expire: Option<DateTime<Utc>>,
     password: bool,
-    username:Option<String>,
     views: i64,
 }
 #[derive(Serialize)]
@@ -52,17 +51,8 @@ async fn get_paste(
                 syntax: paste.syntax,
                 expire: paste.expire,
                 password: paste.password,
-                username:None,
                 views: 0,
             };
-            // Username
-            if paste.user_id.is_some(){
-                match db.get_user_by_id(paste.user_id.unwrap()).await {
-                    Ok(Some(user)) => {response.username=Some(user.username)}
-                    Err(_) => { return HttpResponse::InternalServerError().finish()}
-                    _ => {}
-                }
-            }
             // Burn
             if paste.burn {
                 if paste.user_id != None {
@@ -70,8 +60,8 @@ async fn get_paste(
                 }else{
                     db.delete_paste_by_id(&paste_id).await.expect("Can't Delete The Paste");
                 }
-            }else{// Increment
-
+            }else{
+                // Increment
                 db.increment_view_count_by_paste_id(paste_id).await.expect("Cant' Increment Views");
                 // Views
                 match db.get_view_count_by_paste_id(paste_id).await {
@@ -233,7 +223,6 @@ async fn new_user(
     let user = UserById {
         user_id,
         user_token: "x".to_string(),
-        username: "".to_string(),
     };
     match db.insert_user_by_id(&user).await {
         Ok(_) => HttpResponse::Ok().json(user_id),

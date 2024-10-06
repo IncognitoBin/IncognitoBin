@@ -9,7 +9,6 @@ USE incognitobin_keyspace;
 
 CREATE TABLE IF NOT EXISTS user_by_id (
     user_id UUID PRIMARY KEY,
-    username TEXT,
     user_token TEXT
 );
 

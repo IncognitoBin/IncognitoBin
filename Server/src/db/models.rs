@@ -7,7 +7,6 @@ use scylla::FromRow;
 pub(crate) struct UserById {
     pub(crate) user_id: Uuid,
     pub(crate) user_token: String,
-    pub(crate) username: String,
 }
 
 #[derive(Debug, Serialize, Deserialize,FromRow)]

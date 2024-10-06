@@ -21,7 +21,7 @@ impl ScyllaDbOperations {
 impl PasteDbOperations for ScyllaDbOperations {
     async fn get_user_by_id(&self, userid: Uuid) -> Result<Option<UserById>> {
         let mut iter = self.session
-            .query_iter("SELECT user_id, user_token, username FROM user_by_id where user_id = ? LIMIT 1;", (userid,))
+            .query_iter("SELECT user_id, user_token FROM user_by_id where user_id = ? LIMIT 1;", (userid,))
             .await?
             .into_typed::<UserById>();
         while let Some(user) = iter.try_next().await? {
@@ -107,8 +107,8 @@ impl PasteDbOperations for ScyllaDbOperations {
     async fn insert_user_by_id(&self, user: &UserById) -> Result<()> {
         self.session
             .query_unpaged(
-                "INSERT INTO user_by_id (user_id, username, user_token) VALUES (?, ?, ?)",
-                (user.user_id, &user.username, &user.user_token),
+                "INSERT INTO user_by_id (user_id, user_token) VALUES (?, ?)",
+                (user.user_id, &user.user_token),
             )
             .await?;
         Ok(())
