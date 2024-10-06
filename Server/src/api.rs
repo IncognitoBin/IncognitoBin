@@ -97,9 +97,22 @@ async fn get_paste(
         }
     }
 }
-
-
-
+#[get("/paste")]
+async fn get_user_pastes(
+    req: HttpRequest,
+    config: web::Data<Config>,
+    db: web::Data<ScyllaDbOperations>,
+) -> impl Responder {
+    let user_id = match extract_user_id(&req, &db, &config).await {
+        Some(id) => id,
+        None => {return HttpResponse::Unauthorized().finish()}
+    };
+    let pastes = match db.get_pastes_by_userid(user_id).await {
+        Ok(pastes_uuid) => {pastes_uuid}
+        Err(_) => {return HttpResponse::InternalServerError().finish()}
+    };
+    HttpResponse::Ok().json(pastes)
+}
 
 #[post("/paste")]
 async fn create_paste(
@@ -218,7 +231,7 @@ async fn new_user(
     };
     let user_id = number_text_to_uuid(text_user_id_num);
     let user = UserById {
-        user_id: user_id, // Generate a new UUID
+        user_id,
         user_token: "x".to_string(),
         username: "".to_string(),
     };

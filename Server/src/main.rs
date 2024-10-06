@@ -9,7 +9,7 @@ mod helpers;
 mod redis_handler;
 
 use config::Config;
-use crate::api::{create_paste, delete_paste, get_paste, new_user, user_login};
+use crate::api::{create_paste, delete_paste, get_paste, get_user_pastes, new_user, user_login};
 use crate::db::init::initialize_schema;
 use crate::db::scylla_db_operations::ScyllaDbOperations;
 
@@ -48,6 +48,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(config.clone()).clone())
             .app_data(redis_app_state.clone())
             .service(get_paste)
+            .service(get_user_pastes)
             .service(create_paste)
             .service(delete_paste)
             .service(new_user)
