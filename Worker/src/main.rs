@@ -1,16 +1,15 @@
 use std::sync::Arc;
-use std::thread;
 use std::time::Duration;
 use scylla::{Session, SessionBuilder};
 
 mod paste_ids;
-mod redis_handler;
 mod db;
-mod user_auth;
+mod utils;
+mod handlers;
 
-use crate::db::db_operations_iml::ScyllaDbOperations;
-use crate::paste_ids::handlers::pastes_ids_handler;
-use crate::user_auth::handlers::{ids_queue_handler, tokens_queue_handler};
+use crate::db::db_operations_imlp::ScyllaDbOperations;
+use crate::handlers::paste_ids::pastes_ids_handler;
+use crate::handlers::user_auth::{ids_queue_handler, tokens_queue_handler};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,9 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .expect("Failed to connect to ScyllaDB");
     let session = Arc::new(session);
-
     let client = Arc::new(redis::Client::open("redis://127.0.0.1/")?);
-
     paste_ids::load()?;
     println!("Data loaded successfully!");
 
@@ -63,7 +60,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let db_ops = ScyllaDbOperations::new(scylla_users_ids_session);
         ids_queue_handler(con, db_ops).await;
     });
-
     println!("Starting Now");
 
     // Keep the main thread running

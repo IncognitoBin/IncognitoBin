@@ -1,6 +1,6 @@
-use chrono::{Duration, Utc};
+use chrono::{Utc};
 use crate::paste_ids::constants::SPLIT_SIZE;
-use crate::paste_ids::manager::{UsedID, MANAGER};
+use crate::paste_ids::manager::{MANAGER};
 
 fn get_id_from_expired_id() -> u128 {
     let mut manager = MANAGER.write().unwrap();
@@ -55,14 +55,5 @@ pub fn retrieve_id() -> u128 {
     increment_index();
     let (id, index) = get_id_from_chunk();
     update_chunk_start(index);
-    id
-}
-
-pub fn add_id(id: u128) -> u128 {
-    let mut manager = MANAGER.write().unwrap();
-    manager.expired.push_back(UsedID {
-        id,
-        available: (Utc::now() + Duration::days(30)).timestamp(),
-    });
     id
 }
