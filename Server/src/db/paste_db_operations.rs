@@ -1,6 +1,6 @@
 use anyhow::Result;
 use uuid::Uuid;
-use crate::db::models::{PasteById, UserById, UserByToken};
+use crate::db::models::{PasteById, UserById};
 use scylla::frame::value::Counter;
 
 #[async_trait::async_trait]
@@ -13,7 +13,6 @@ pub trait PasteDbOperations {
     async fn get_view_count_by_paste_id(&self, paste_id: Uuid) -> Result<Option<Counter>>;
     async fn increment_view_count_by_paste_id(&self, paste_id: Uuid) -> Result<()>;
     async fn insert_user_by_id(&self, user: &UserById) -> Result<()>;
-    async fn insert_user_by_token(&self, user: &UserByToken) -> Result<()>;
     async fn insert_paste(&self, paste: &PasteById,duration:i32) -> Result<()>;
     async fn insert_paste_by_user_id(&self, user_id: Uuid, paste_id: Uuid, duration: i32) -> Result<()>;
     async fn delete_paste_by_id(&self, paste_id: &Uuid) -> Result<()>;

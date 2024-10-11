@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS user_by_token (
     user_id UUID
 ) WITH default_time_to_live = 86400;
 
+
 CREATE TABLE IF NOT EXISTS paste_by_id (
     paste_id UUID PRIMARY KEY,
     title TEXT,

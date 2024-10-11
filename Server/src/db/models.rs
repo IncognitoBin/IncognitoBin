@@ -10,12 +10,6 @@ pub(crate) struct UserById {
 }
 
 #[derive(Debug, Serialize, Deserialize,FromRow)]
-pub(crate) struct UserByToken {
-    pub(crate) user_token: String,
-    pub(crate) user_id: Uuid,
-}
-
-#[derive(Debug, Serialize, Deserialize,FromRow)]
 pub(crate) struct PasteById {
     pub(crate) paste_id: Uuid,
     pub(crate) title: String,

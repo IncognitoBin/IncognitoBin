@@ -5,7 +5,7 @@ use uuid::Uuid;
 use anyhow::{Context, Result};
 use scylla::batch::Batch;
 use scylla::frame::value::Counter;
-use crate::db::models::{PasteById, UserById, UserByToken};
+use crate::db::models::{PasteById, UserById};
 use crate::db::paste_db_operations::PasteDbOperations;
 pub struct ScyllaDbOperations {
     session: Arc<Session>,
@@ -109,16 +109,6 @@ impl PasteDbOperations for ScyllaDbOperations {
             .query_unpaged(
                 "INSERT INTO user_by_id (user_id, user_token) VALUES (?, ?)",
                 (user.user_id, &user.user_token),
-            )
-            .await?;
-        Ok(())
-    }
-
-    async fn insert_user_by_token(&self, user: &UserByToken) -> Result<()> {
-        self.session
-            .query_unpaged(
-                "INSERT INTO user_by_token (user_token, user_id) VALUES (?, ?)",
-                (&user.user_token, user.user_id),
             )
             .await?;
         Ok(())
