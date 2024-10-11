@@ -20,6 +20,8 @@ impl Config {
             max_content_kb: env::var("MAX_CONTENT_KB")?.parse().unwrap_or(10000),
             token_size: env::var("TOKEN_SIZE")?.parse().unwrap_or(150),
             max_syntax_length: env::var("MAX_SYNTAX_LENGTH")?.parse().unwrap_or(20),
+            min_paste_duration: env::var("MIN_PASTE_DURATION")?.parse().unwrap_or(60),
+            max_paste_duration: env::var("MAX_PASTE_DURATION")?.parse().unwrap_or(31_556_952), // default is 1 yeAr and the max is 68.05 :)
 
         })
     }
