@@ -5,8 +5,10 @@ use uuid::Uuid;
 use anyhow::{Context, Result};
 use scylla::batch::Batch;
 use scylla::frame::value::Counter;
-use crate::db::models::{PasteById, UserById};
 use crate::db::paste_db_operations::PasteDbOperations;
+use crate::models::paste::PasteById;
+use crate::models::user::UserById;
+
 pub struct ScyllaDbOperations {
     session: Arc<Session>,
 }

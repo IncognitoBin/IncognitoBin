@@ -1,7 +1,8 @@
 use anyhow::Result;
 use uuid::Uuid;
-use crate::db::models::{PasteById, UserById};
 use scylla::frame::value::Counter;
+use crate::models::paste::PasteById;
+use crate::models::user::UserById;
 
 #[async_trait::async_trait]
 pub trait PasteDbOperations {
