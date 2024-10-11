@@ -123,10 +123,10 @@ impl PasteDbOperations for ScyllaDbOperations {
             .await?;
         Ok(())
     }
-    async fn insert_paste(&self, paste: &PasteById) -> Result<()> {
+    async fn insert_paste(&self, paste: &PasteById, duration: i32) -> Result<()> {
         let query = "INSERT INTO paste_by_id (
         paste_id, title, content, syntax, password, expire, burn, user_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?) USING TTL ?";
 
         self.session
             .query_unpaged(
@@ -140,6 +140,7 @@ impl PasteDbOperations for ScyllaDbOperations {
                     paste.expire,
                     paste.burn,
                     paste.user_id,
+                    duration,
                 ),
             )
             .await?;
@@ -147,10 +148,12 @@ impl PasteDbOperations for ScyllaDbOperations {
         Ok(())
     }
 
-    async fn insert_paste_by_user_id(&self, user_id: Uuid, paste_id: Uuid) -> Result<()> {
-        let query = "INSERT INTO pastes_by_user_id (user_id, paste_id) VALUES (?, ?)";
+
+
+    async fn insert_paste_by_user_id(&self, user_id: Uuid, paste_id: Uuid, duration: i32) -> Result<()> {
+        let query = "INSERT INTO pastes_by_user_id (user_id, paste_id) VALUES (?, ?) USING TTL ?";
         self.session
-            .query_unpaged(query, (user_id, paste_id))
+            .query_unpaged(query, (user_id, paste_id,duration))
             .await?;
         Ok(())
     }

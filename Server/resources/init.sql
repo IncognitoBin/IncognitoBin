@@ -34,14 +34,6 @@ CREATE TABLE IF NOT EXISTS pastes_by_user_id (
     PRIMARY KEY (user_id, paste_id)
 );
 
-CREATE TABLE IF NOT EXISTS expire_date (
-    year INT,
-    month INT,
-    day INT,
-    hour INT,
-    minute INT,
-    PRIMARY KEY (year, month, day, hour, minute)
-);
 CREATE TABLE IF NOT EXISTS paste_view_counts (
     paste_id UUID PRIMARY KEY,
     view_count COUNTER

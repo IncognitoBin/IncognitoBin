@@ -7,7 +7,7 @@ pub struct CreatePasteRequest {
     pub(crate) content: String,
     pub(crate) syntax: Option<String>,
     pub(crate) password: bool,
-    pub(crate) expire: Option<i64>,
+    pub(crate) expire: Option<i32>,
     pub(crate) burn: Option<bool>,
 }
 #[derive(Deserialize)]

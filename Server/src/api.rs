@@ -120,16 +120,18 @@ async fn create_paste(
     if paste_data.content.len() > config.max_content_kb as usize || paste_data.content.len() < 24 {
         return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Content size must be between 24 AND {} bytes", config.max_content_kb).to_string() });
     }
+    let mut duration = 0;
     // Expiration
     let expiration_time = match paste_data.expire {
         Some(seconds) => {
             if seconds == 0 {
                 None
-            } else if seconds >= 10 * 60 && seconds <= 365 * 24 * 60 * 60 {
-                Some(Utc::now() + Duration::seconds(seconds))
+            } else if seconds >= 60 && seconds <= 365 * 24 * 60 * 60 {
+                duration=seconds;
+                Some(Utc::now() + Duration::seconds(seconds as i64))
             } else {
                 return HttpResponse::BadRequest().json(ErrorResponse {
-                    error: "Expiration time must be between 10 minutes and 1 year".to_string(),
+                    error: "Expiration time must be between 1 minute and 1 year".to_string(),
                 });
             }
         }
@@ -167,17 +169,20 @@ async fn create_paste(
         burn: paste_data.burn.unwrap_or(false),
         user_id,
     };
-    match db.insert_paste(&new_paste).await {
+    match db.insert_paste(&new_paste, duration).await {
         Ok(_) => {
             if let Some(user_id) = new_paste.user_id {
-                if let Err(e) = db.insert_paste_by_user_id(user_id, paste_id).await {
+                if let Err(e) = db.insert_paste_by_user_id(user_id, paste_id,duration).await {
                     eprintln!("Failed to associate paste with user: {:?}", e);
                 }
             }
             HttpResponse::Created().json(CreatePasteResponse { paste_id })
         }
-        Err(_) => HttpResponse::InternalServerError().finish(),
+        Err(_) => {
+            HttpResponse::InternalServerError().finish()
+        }
     }
+
 }
 #[delete("/paste/{paste_id}")]
 async fn delete_paste(
