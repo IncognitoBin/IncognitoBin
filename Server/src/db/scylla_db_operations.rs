@@ -187,6 +187,13 @@ impl PasteDbOperations for ScyllaDbOperations {
         self.session.batch(&prepared_batch, batch_values).await?;
         Ok(())
     }
+    async fn delete_user_token(&self, token: String) -> Result<()> {
+        let query = "DELETE FROM user_by_token WHERE user_token = ?";
+        self.session
+            .query_unpaged(query, (token,))
+            .await?;
+        Ok(())
+    }
     async fn execute_update_token_operations(&self, old_token: String, new_token: String,user_id:&Uuid) -> Result<()> {
         let mut batch: Batch = Default::default();
         batch.append_statement("DELETE FROM user_by_token WHERE user_token = ?");
