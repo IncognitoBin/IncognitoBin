@@ -1,5 +1,5 @@
 use actix_web::{web};
-use crate::handlers::auth_handlers::{new_user, user_login};
+use crate::handlers::auth_handlers::{new_user, user_login, user_logout};
 use crate::handlers::paste_handlers::{create_paste, delete_paste, get_paste, get_user_pastes};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -13,5 +13,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             // User endpoints
             .service(new_user)        // GET /user
             .service(user_login)      // POST /user
+            .service(user_logout)     // DELETE /user
     );
 }

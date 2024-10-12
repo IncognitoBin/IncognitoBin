@@ -1,10 +1,11 @@
 
 use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::{ScyllaDbOperations};
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
 use uuid::Uuid;
 use crate::{RedisAppState};
-use crate::utils::helpers::number_text_to_uuid;
+use crate::config::settings::Config;
+use crate::utils::helpers::{extract_user_token, number_text_to_uuid};
 use crate::db::redis_operations::dequeue;
 use crate::models::user::UserById;
 use crate::models::user_vm::UserLoginRequest;
@@ -62,4 +63,19 @@ async fn user_login(
     };
     db.execute_update_token_operations(user_old_token,new_user_token.clone(),&user_id).await.unwrap();
     HttpResponse::Ok().json(new_user_token)
+}
+#[delete("/user")]
+async fn user_logout(
+    db: web::Data<ScyllaDbOperations>,
+    req: HttpRequest,
+    config: web::Data<Config>
+) -> impl Responder {
+    let token: Option<String>;
+    token = match extract_user_token(&req, &config).await {
+        Some(token) => Some(token.to_string()),
+        _ => {return HttpResponse::Unauthorized().finish();}
+
+    };
+    db.delete_user_token(token.unwrap().to_string()).await.unwrap();
+    HttpResponse::Ok().finish()
 }
