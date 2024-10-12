@@ -22,7 +22,6 @@ impl Config {
             max_syntax_length: env::var("MAX_SYNTAX_LENGTH")?.parse().unwrap_or(20),
             min_paste_duration: env::var("MIN_PASTE_DURATION")?.parse().unwrap_or(60),
             max_paste_duration: env::var("MAX_PASTE_DURATION")?.parse().unwrap_or(31_556_952), // default is 1 yeAr and the max is 68.05 :)
-
         })
     }
 }
