@@ -2,7 +2,6 @@
 use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::{ScyllaDbOperations};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
-use uuid::Uuid;
 use crate::{RedisAppState};
 use crate::config::settings::Config;
 use crate::utils::helpers::{extract_user_token, number_text_to_uuid};
@@ -41,8 +40,7 @@ async fn user_login(
     login_data: web::Json<UserLoginRequest>,
     redis_con: web::Data<RedisAppState>,
 ) -> impl Responder {
-    let user_id=Uuid::from_u128(login_data.id);
-    let user_old_token = match db.get_user_by_id(user_id).await {
+    let user_old_token = match db.get_user_by_id(login_data.id).await {
         Ok(user) => {
             if user.is_none(){
                 return HttpResponse::NotFound().finish()
@@ -61,7 +59,7 @@ async fn user_login(
         Ok(None) => return HttpResponse::NotFound().body("No IDs in queue"),
         Err(_) => return HttpResponse::InternalServerError().finish(),
     };
-    db.execute_update_token_operations(user_old_token,new_user_token.clone(),&user_id).await.unwrap();
+    db.execute_update_token_operations(user_old_token,new_user_token.clone(),&login_data.id).await.unwrap();
     HttpResponse::Ok().json(UserLoginResponse {token:new_user_token})
 }
 #[delete("/user")]

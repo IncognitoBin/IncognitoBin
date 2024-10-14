@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 #[derive(Deserialize)]
 pub struct UserLoginRequest {
-    pub(crate) id: u128,
+    pub(crate) id: Uuid,
 }
 #[derive(Serialize)]
 pub struct CreatedUserResponse {
