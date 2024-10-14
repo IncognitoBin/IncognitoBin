@@ -31,3 +31,20 @@ export function encryptData(
 
   return ciphertext;
 }
+
+export function decryptData(
+    ivStr: string,
+    secretKey: string,
+    data: string
+): string {
+  const iv = CryptoJS.enc.Utf8.parse(padIfTooShort(ivStr, 16, DEFAULT_IV));
+  const key = CryptoJS.enc.Utf8.parse(
+      padIfTooShort(secretKey, 32, DEFAULT_KEY)
+  );
+  const originalData = CryptoJS.AES.decrypt(data, key, {
+    iv: iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  }).toString(CryptoJS.enc.Utf8);
+  return originalData;
+}
