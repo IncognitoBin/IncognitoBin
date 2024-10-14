@@ -16,10 +16,10 @@ lerna-debug.log*
 *.sln
 *.sw?
 
-GUI/node_modules
-GUI/dist
-GUI/dist-ssr
-GUI/*.local
+Client/node_modules
+Client/dist
+Client/dist-ssr
+Client/*.local
 
 /Worker/data.json
 /Worker/target/
