@@ -12,5 +12,5 @@ pub struct CreatePasteRequest {
 }
 #[derive(Serialize)]
 pub struct CreatedPasteResponse {
-    pub(crate) paste_id: Uuid,
+    pub(crate) id: Uuid,
 }

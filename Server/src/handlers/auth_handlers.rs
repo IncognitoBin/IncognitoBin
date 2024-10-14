@@ -8,7 +8,7 @@ use crate::config::settings::Config;
 use crate::utils::helpers::{extract_user_token, number_text_to_uuid};
 use crate::db::redis_operations::dequeue;
 use crate::models::user::UserById;
-use crate::models::user_vm::UserLoginRequest;
+use crate::models::user_vm::{CreatedUserResponse, UserLoginRequest, UserLoginResponse};
 
 #[get("/user")]
 async fn new_user(
@@ -31,7 +31,7 @@ async fn new_user(
         user_token: "x".to_string(),
     };
     match db.insert_user_by_id(&user).await {
-        Ok(_) => HttpResponse::Ok().json(user_id),
+        Ok(_) => HttpResponse::Ok().json(CreatedUserResponse{id:user_id}),
         Err(_) => HttpResponse::InternalServerError().finish()
     }
 }
@@ -62,7 +62,7 @@ async fn user_login(
         Err(_) => return HttpResponse::InternalServerError().finish(),
     };
     db.execute_update_token_operations(user_old_token,new_user_token.clone(),&user_id).await.unwrap();
-    HttpResponse::Ok().json(new_user_token)
+    HttpResponse::Ok().json(UserLoginResponse {token:new_user_token})
 }
 #[delete("/user")]
 async fn user_logout(

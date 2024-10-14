@@ -174,7 +174,7 @@ async fn create_paste(
                     eprintln!("Failed to associate paste with user: {:?}", e);
                 }
             }
-            HttpResponse::Created().json(CreatedPasteResponse { paste_id })
+            HttpResponse::Created().json(CreatedPasteResponse { id:paste_id })
         }
         Err(_) => {
             HttpResponse::InternalServerError().finish()
