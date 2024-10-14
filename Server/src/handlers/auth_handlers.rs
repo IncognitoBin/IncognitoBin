@@ -41,7 +41,7 @@ async fn user_login(
     login_data: web::Json<UserLoginRequest>,
     redis_con: web::Data<RedisAppState>,
 ) -> impl Responder {
-    let user_id=Uuid::from_u128(login_data.user_id);
+    let user_id=Uuid::from_u128(login_data.id);
     let user_old_token = match db.get_user_by_id(user_id).await {
         Ok(user) => {
             if user.is_none(){
