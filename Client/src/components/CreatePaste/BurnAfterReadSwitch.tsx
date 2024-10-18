@@ -25,7 +25,7 @@ interface BurnAfterReadSwitchProps {
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Delete After First View</p>
+            <p className="select-none">Delete After First View</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
