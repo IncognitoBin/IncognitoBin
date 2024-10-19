@@ -12,9 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "../ui/label";
+import { Label } from "../../ui/label";
 interface ExpirationProps {
-  setExpiration: (value: string) => void;
+  setExpiration: (value: number) => void;
 }
 const ExpireWithLabel: React.FC<ExpirationProps> = ({ setExpiration }) => {
   return (
@@ -28,7 +28,7 @@ const ExpireWithLabel: React.FC<ExpirationProps> = ({ setExpiration }) => {
             <Select
               defaultValue="300"
               onValueChange={(v) => {
-                setExpiration(v);
+                setExpiration(Number(v));
               }}
             >
               <SelectTrigger className="w-[150px]">
