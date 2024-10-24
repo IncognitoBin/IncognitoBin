@@ -32,14 +32,15 @@ export function encryptData(
   const key = CryptoJS.enc.Utf8.parse(
     padIfTooShort(secretKey, 32, DEFAULT_KEY)
   );
-
-  const ciphertext = CryptoJS.AES.encrypt(data, key, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  }).toString();
-
-  return ciphertext;
+  if(data.trim().length > 0){
+    const ciphertext = CryptoJS.AES.encrypt(data, key, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    }).toString();
+    return ciphertext;
+  }
+  return ""
 }
 
 export function decryptData(
