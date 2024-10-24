@@ -2,6 +2,7 @@ use std::sync::Arc;
 use actix_web::{web, App, HttpServer};
 use scylla::{Session, SessionBuilder};
 use crate::config::settings::Config;
+use actix_cors::Cors;
 
 mod db;
 mod models;
@@ -51,6 +52,9 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(
+                Cors::permissive()
+            )
             .app_data(db_ops.clone())
             .app_data(web::Data::new(config.clone()).clone())
             .app_data(redis_app_state.clone())
