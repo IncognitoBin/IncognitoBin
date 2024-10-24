@@ -2,25 +2,16 @@
 use crate::Config;
 use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::{ScyllaDbOperations};
-use crate::models::paste_vm::{CreatePasteRequest, CreatedPasteResponse};
+use crate::models::paste_vm::{CreatePasteRequest, CreatedPasteResponse, PasteResponse};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
-use chrono::{DateTime, Duration, Utc};
+use chrono::{Duration, Utc};
 use serde::Serialize;
 use uuid::Uuid;
 use crate::{RedisAppState};
-use crate::utils::helpers::{extract_user_id, number_text_to_uuid};
+use crate::utils::helpers::{extract_user_id, number_text_to_uuid, time_difference_in_seconds};
 use crate::db::redis_operations::dequeue;
 use crate::models::paste::PasteById;
 
-#[derive(Serialize)]
-struct PasteResponse {
-    title: String,
-    content: String,
-    signature: String,
-    syntax: Option<String>,
-    expire: Option<DateTime<Utc>>,
-    views: i64,
-}
 #[derive(Serialize)]
 struct ErrorResponse {
     error: String,
@@ -49,7 +40,7 @@ async fn get_paste(
                 signature: paste.signature,
                 content: paste.content,
                 syntax: paste.syntax,
-                expire: paste.expire,
+                expire: time_difference_in_seconds(paste.expire),
                 views: 0,
             };
             // Burn
