@@ -8,6 +8,7 @@ import { UserLoginResponse } from '../models/User/Response/UserLoginResponse';
 const API_BASE_URL = 'http://localhost:8181/api/user';
 
 export class UserService {
+
   static async New(): Promise<NewUserResponse> {
     try {
       const response = await axios.get<NewUserResponse>(`${API_BASE_URL}`);
@@ -38,4 +39,23 @@ export class UserService {
       throw error;
     }
   }
+  static setUserToken(value: string): void {
+    const date = new Date();
+    date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
+    const expires = `expires=${date.toUTCString()}`;
+    document.cookie = `token=${value};${expires};path=/`;
+  }
+  static getUserCookie(): string | null {
+    const cookieName = `token=`;
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(';');
+    for (let i = 0; i < cookieArray.length; i++) {
+      let cookie = cookieArray[i].trim();
+      if (cookie.indexOf(cookieName) === 0) {
+        return cookie.substring(cookieName.length, cookie.length);
+      }
+    }
+    return null;
+  }
+  
 }
