@@ -10,7 +10,6 @@ pub(crate) struct PasteById {
     pub(crate) signature: String,
     pub(crate) content: String,
     pub(crate) syntax: Option<String>,
-    pub(crate) password: bool,
     pub(crate) expire: Option<DateTime<Utc>>,
     pub(crate) burn: bool,
     pub(crate) user_id: Option<Uuid>,

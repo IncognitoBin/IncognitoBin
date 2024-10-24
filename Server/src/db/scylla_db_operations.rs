@@ -47,7 +47,7 @@ impl PasteDbOperations for ScyllaDbOperations {
     async fn get_paste_by_id(&self, paste_id: Uuid) -> Result<Option<PasteById>> {
         let mut iter = self.session
             .query_iter(
-                "SELECT paste_id, title, content, syntax, password, expire, burn, user_id
+                "SELECT paste_id, title, signature, content, syntax, expire, burn, user_id
              FROM paste_by_id WHERE paste_id = ? LIMIT 1;",
                 (paste_id,),
             )
@@ -117,7 +117,7 @@ impl PasteDbOperations for ScyllaDbOperations {
     }
     async fn insert_paste(&self, paste: &PasteById, duration: i32) -> Result<()> {
         let query = "INSERT INTO paste_by_id (
-        paste_id, title, content, syntax, password, expire, burn, user_id
+        paste_id, title, signature, content, syntax, expire, burn, user_id
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?) USING TTL ?";
 
         self.session
@@ -126,9 +126,9 @@ impl PasteDbOperations for ScyllaDbOperations {
                 (
                     paste.paste_id,
                     &paste.title,
+                    &paste.signature,
                     &paste.content,
                     &paste.syntax,
-                    &paste.password,
                     paste.expire,
                     paste.burn,
                     paste.user_id,

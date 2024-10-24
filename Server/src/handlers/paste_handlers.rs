@@ -16,9 +16,9 @@ use crate::models::paste::PasteById;
 struct PasteResponse {
     title: String,
     content: String,
+    signature: String,
     syntax: Option<String>,
     expire: Option<DateTime<Utc>>,
-    password: bool,
     views: i64,
 }
 #[derive(Serialize)]
@@ -46,10 +46,10 @@ async fn get_paste(
             }
             let mut response = PasteResponse {
                 title: paste.title,
+                signature: paste.signature,
                 content: paste.content,
                 syntax: paste.syntax,
                 expire: paste.expire,
-                password: paste.password,
                 views: 0,
             };
             // Burn
@@ -167,7 +167,6 @@ async fn create_paste(
         signature: paste_data.signature.clone(),
         content: paste_data.content.clone(),
         syntax: paste_data.syntax.clone(),
-        password: paste_data.password,
         expire: expiration_time,
         burn: paste_data.burn.unwrap_or(false),
         user_id,

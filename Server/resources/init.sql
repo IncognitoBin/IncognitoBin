@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS paste_by_id (
     signature TEXT,
     content TEXT,
     syntax TEXT,
-    password BOOLEAN,
     expire TIMESTAMP,
     burn BOOLEAN,
     user_id UUID
