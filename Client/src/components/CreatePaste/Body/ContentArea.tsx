@@ -41,8 +41,8 @@ const ContentArea: React.FC<ContentAreaProps> = ({
               rows={1}
               placeholder="Your Content Here..."
               className={cn(
-                  "w-full overflow-hidden resize-none bg-transparent p-5 min-h-60 border-none outline-none",
-                  {
+                "w-full overflow-hidden resize-none bg-transparent p-5 min-h-60 border-none outline-none",
+                {
                       hidden: tap !== 0,
                     }
                     )}

@@ -30,8 +30,8 @@ const CreatePasteHeader: React.FC<CreatePasteHeaderProps> = ({
   setExpiration
 }) => {
   return (
-      <div className="flex flex-col 2xl:flex-row justify-between 2xl:items-center items-start h-44 2xl:h-[102px]  p-5">
-        <div className="flex flex-row justify-between w-[650px]">
+      <div className="flex flex-col 2xl:flex-row justify-between 2xl:items-center items-start h-36 2xl:h-[102px] pb-4">
+        <div className="flex flex-row justify-between 2xl:w-[670px] gap-[4.5rem] 2xl:gap-0">
           <InputWithLabel
             InputLabelText="Title "
             InputPlaceHolder="Your Title (Optional)"
@@ -42,7 +42,7 @@ const CreatePasteHeader: React.FC<CreatePasteHeaderProps> = ({
           <SyntaxBox value={syntax} setValue={setSyntax} />
           <ExpireWithLabel setExpiration={setExpiration} />
         </div>
-        <div className="flex flex-row justify-between w-[756.8px] 2xl:ml-5 ml-0">
+        <div className="flex flex-row justify-between w-[776.8px] 2xl:ml-5 ml-0">
           <InputWithGenerator
             InputLabelText="Secret Key"
             InputPlaceHolder="Private Secret Key"
