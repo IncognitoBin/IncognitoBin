@@ -7,6 +7,7 @@ use uuid::Uuid;
 pub(crate) struct PasteById {
     pub(crate) paste_id: Uuid,
     pub(crate) title: String,
+    pub(crate) signature: String,
     pub(crate) content: String,
     pub(crate) syntax: Option<String>,
     pub(crate) password: bool,

@@ -141,6 +141,10 @@ async fn create_paste(
         Some(id) => Option::from(id),
         _ => {None}
     };
+    // Signature
+    if paste_data.signature.len() != 24usize {
+        return HttpResponse::BadRequest().json(ErrorResponse { error: "invalid Signature".to_string() });
+    }
     // Syntax
     if paste_data.syntax.is_some() && paste_data.syntax.clone().unwrap_or("".to_string()).len() > config.max_syntax_length as usize {
         return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Syntax must not exceed {} characters", config.max_syntax_length).to_string() });
@@ -160,6 +164,7 @@ async fn create_paste(
     let new_paste = PasteById {
         paste_id,
         title: paste_data.title.clone(),
+        signature: paste_data.signature.clone(),
         content: paste_data.content.clone(),
         syntax: paste_data.syntax.clone(),
         password: paste_data.password,
