@@ -3,7 +3,7 @@ export interface GetPaste {
     content: string;      
     signature: string;      
     syntax: string;       
-    expire: Date;         
+    expire: number;         
     views: number;        
     createdAt?: Date;     
 }
