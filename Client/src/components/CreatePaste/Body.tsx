@@ -1,12 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Icons } from "../icons";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  materialDark,
-  materialLight,
-} from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
+import { useState } from "react";
+
 import ContentArea from "./Body/ContentArea";
 import ContentHeader from "./Body/ContentHeader";
 interface CreatePasteBodyProps {

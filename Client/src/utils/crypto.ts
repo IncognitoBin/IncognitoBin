@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-const DEFAULT_KEY = "iYCcUmX4Xb6m2jQ6s8nXHKhJkK29EeOv";
+export const DEFAULT_KEY = "iYCcUmX4Xb6m2jQ6s8nXHKhJkK29EeOv";
 const DEFAULT_IV = "hlx8B6w7z31nv935";
 export function generateRandomKey(length: number): string {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
