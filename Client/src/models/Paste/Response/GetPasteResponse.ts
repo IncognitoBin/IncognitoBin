@@ -1,9 +1,9 @@
 export interface GetPaste {
     title: string;        
     content: string;      
+    signature: string;      
     syntax: string;       
     expire: Date;         
-    password: boolean;    
     views: number;        
     createdAt?: Date;     
 }

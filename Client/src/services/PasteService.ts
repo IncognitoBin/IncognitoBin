@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { GetPaste } from '../models/Paste/Response/GetPasteResponse';
-import { CreatePaste } from '../models/Paste/Request/CreatePasteRequest';
+import { CreatePasteRequest } from '../models/Paste/Request/CreatePasteRequest';
 import { CreatedPaste } from '../models/Paste/Response/CreatedPasteResponse';
 
 // Replace this URL with your actual backend API URL
@@ -30,7 +30,7 @@ export class PasteService {
       throw error;
     }
   }
-  static async createPaste(newPaste: CreatePaste,userToken:string): Promise<CreatedPaste> {
+  static async createPaste(newPaste: CreatePasteRequest,userToken:string): Promise<CreatedPaste> {
     try {
       const response = await axios.post<CreatedPaste>(API_BASE_URL, newPaste, {
         headers: {
