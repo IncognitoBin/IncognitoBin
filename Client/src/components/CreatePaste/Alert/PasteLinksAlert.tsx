@@ -18,10 +18,11 @@ interface PasteLinksAlertProps
   SecretKey: string;
   PasteId: string;
   IvKey: string;
+  onDoneClick: () => void;
 }
 
 const PasteLinksAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
-  ({ SecretKey,PasteId ,IvKey}, ref) => {
+  ({ SecretKey,PasteId ,IvKey,onDoneClick}, ref) => {
     const [CopiedIndex,setCopiedIndex] = useState(-1);
     const copyToClipBoard = (Text: string,Index:number) => {
         setCopiedIndex(Index);
@@ -89,7 +90,7 @@ const PasteLinksAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
             )}
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction>Done</AlertDialogAction>
+            <AlertDialogAction onClick={onDoneClick}>Done</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

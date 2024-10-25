@@ -63,7 +63,6 @@ const CreatePaste = () => {
         onConfirmedRed.current.click();
       }
       setNewPasteId(paste_id);
-      resetFields();
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.error || "An unexpected error occurred";
@@ -75,11 +74,10 @@ const CreatePaste = () => {
       });
     }
   };
-
   return (
     <div className="m-4 flex flex-col items-center">
       <NoSecretKeyAlert ref={onCreateClickRef} CreateNewPaste={CreateNewPaste}/>
-      <PasteLinksAlert ref={onConfirmedRed} SecretKey={secretkey} IvKey={ivkey} PasteId={newPasteId}/>
+      <PasteLinksAlert ref={onConfirmedRed} SecretKey={secretkey} IvKey={ivkey} PasteId={newPasteId} onDoneClick={resetFields}/>
       <CreatePasteHeader
         burn={burn}
         setBurn={setBurn}
