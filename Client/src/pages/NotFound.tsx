@@ -1,11 +1,11 @@
-import MyxX from "../assets/bigLogo.png";
+import BigLogo from "../assets/bigLogo.webp";
 
 const NotFoundPage = ()=> {
     return(
-        <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-gray-950 dark:bg-gray-950 text-gray-50 p-4">
+        <div className="flex flex-col items-center justify-center min-h-[90dvh] bg-gray-950 dark:bg-gray-950 text-gray-50 p-4">
           <div className="max-w-xl w-full space-y-6 text-center">
             <img
-              src={MyxX}
+              src={BigLogo}
               width={320}
               height={240}
               alt="404"
