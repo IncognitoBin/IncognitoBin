@@ -4,7 +4,7 @@ import { NewUserResponse } from '../models/User/Response/NewUserResponse';
 import { UserLoginResponse } from '../models/User/Response/UserLoginResponse';
 
 
-const API_BASE_URL = 'http://localhost:8181/api/user';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/user";
 
 export class UserService {
 

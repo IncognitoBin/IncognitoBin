@@ -2,15 +2,15 @@ import axios from 'axios';
 import { GetPaste } from '../models/Paste/Response/GetPasteResponse';
 import { CreatePasteRequest } from '../models/Paste/Request/CreatePasteRequest';
 import { CreatedPaste } from '../models/Paste/Response/CreatedPasteResponse';
+import { GetPasteGenInfo } from '@/models/Paste/Response/GetPasteGenInfoResponse';
 
-// Replace this URL with your actual backend API URL
-const API_BASE_URL = 'http://localhost:8181/api/paste';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/paste";
 
 export class PasteService {
 
-  static async getAllPastes(userToken: string): Promise<string[]> {
+  static async getAllPastes(userToken: string): Promise<GetPasteGenInfo[]> {
     try {
-      const response = await axios.get<string[]>(API_BASE_URL, {
+      const response = await axios.get<GetPasteGenInfo[]>(API_BASE_URL, {
         headers: {
           Authorization: userToken,
         },
