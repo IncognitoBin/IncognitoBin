@@ -4,7 +4,6 @@ import { NewUserResponse } from '../models/User/Response/NewUserResponse';
 import { UserLoginResponse } from '../models/User/Response/UserLoginResponse';
 
 
-// Replace this URL with your actual backend API URL
 const API_BASE_URL = 'http://localhost:8181/api/user';
 
 export class UserService {
@@ -45,17 +44,9 @@ export class UserService {
     const expires = `expires=${date.toUTCString()}`;
     document.cookie = `token=${value};${expires};path=/`;
   }
-  static getUserCookie(): string | null {
-    const cookieName = `token=`;
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const cookieArray = decodedCookie.split(';');
-    for (let i = 0; i < cookieArray.length; i++) {
-      let cookie = cookieArray[i].trim();
-      if (cookie.indexOf(cookieName) === 0) {
-        return cookie.substring(cookieName.length, cookie.length);
-      }
-    }
-    return null;
+  static getUserCookie(): string | undefined {
+    var b = document.cookie.match("(^|;)\\s*token\\s*=\\s*([^;]+)");
+    return b ? b.pop() : "";
   }
   
 }
