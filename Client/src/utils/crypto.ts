@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-const DEFAULT_KEY = "iYCcUmX4Xb6m2jQ6s8nXHKhJkK29EeOv";
+export const DEFAULT_KEY = "iYCcUmX4Xb6m2jQ6s8nXHKhJkK29EeOv";
 const DEFAULT_IV = "hlx8B6w7z31nv935";
 export function generateRandomKey(length: number): string {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -32,14 +32,15 @@ export function encryptData(
   const key = CryptoJS.enc.Utf8.parse(
     padIfTooShort(secretKey, 32, DEFAULT_KEY)
   );
-
-  const ciphertext = CryptoJS.AES.encrypt(data, key, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  }).toString();
-
-  return ciphertext;
+  if(data.trim().length > 0){
+    const ciphertext = CryptoJS.AES.encrypt(data, key, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    }).toString();
+    return ciphertext;
+  }
+  return ""
 }
 
 export function decryptData(
@@ -47,14 +48,24 @@ export function decryptData(
   secretKey: string,
   data: string
 ): string {
-  const iv = CryptoJS.enc.Utf8.parse(padIfTooShort(ivStr, 16, DEFAULT_IV));
-  const key = CryptoJS.enc.Utf8.parse(
-    padIfTooShort(secretKey, 32, DEFAULT_KEY)
-  );
-  const originalData = CryptoJS.AES.decrypt(data, key, {
-    iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  }).toString(CryptoJS.enc.Utf8);
-  return originalData;
+  if (!data) {
+    return ""; 
+  }
+
+  try {
+    const iv = CryptoJS.enc.Utf8.parse(padIfTooShort(ivStr, 16, DEFAULT_IV));
+    const key = CryptoJS.enc.Utf8.parse(
+      padIfTooShort(secretKey, 32, DEFAULT_KEY)
+    );
+    const originalData = CryptoJS.AES.decrypt(data, key, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    }).toString(CryptoJS.enc.Utf8);
+
+    return originalData;
+  } catch (e) {
+    console.error("Error during decryption:", e);
+    return ""; // Return an empty string or handle the error case as needed
+  }
 }

@@ -21,9 +21,9 @@ CREATE TABLE IF NOT EXISTS user_by_token (
 CREATE TABLE IF NOT EXISTS paste_by_id (
     paste_id UUID PRIMARY KEY,
     title TEXT,
+    signature TEXT,
     content TEXT,
     syntax TEXT,
-    password BOOLEAN,
     expire TIMESTAMP,
     burn BOOLEAN,
     user_id UUID

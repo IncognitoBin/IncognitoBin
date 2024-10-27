@@ -38,7 +38,7 @@ const ContentHeader: React.FC<ContentAreaProps> = ({
           </div>
           <div className="flex items-center justify-between [&>div:hover]:opacity-100 [&>div:hover]:bg-[var(--chal-itm-sktn-bg)] [&>div]:p-1.5 [&>div]:text-center [&>div]:rounded-md [&>div]:cursor-pointer [&>div]:ml-1">
             <div className={cn("flex gap-1 items-center")}>
-              <Button onClick={CreateAction} className="h-8 w-14 text-sm">
+              <Button onClick={CreateAction} className="h-8 w-14 text-sm border-[1px] border-current" variant={"ghost"}>
                 Create
               </Button>
             </div>

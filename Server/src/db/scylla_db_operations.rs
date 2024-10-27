@@ -6,7 +6,7 @@ use anyhow::{Context, Result};
 use scylla::batch::Batch;
 use scylla::frame::value::Counter;
 use crate::db::paste_db_operations::PasteDbOperations;
-use crate::models::paste::PasteById;
+use crate::models::paste::{PasteById, PasteInfoById};
 use crate::models::user::UserById;
 
 pub struct ScyllaDbOperations {
@@ -47,12 +47,28 @@ impl PasteDbOperations for ScyllaDbOperations {
     async fn get_paste_by_id(&self, paste_id: Uuid) -> Result<Option<PasteById>> {
         let mut iter = self.session
             .query_iter(
-                "SELECT paste_id, title, content, syntax, password, expire, burn, user_id
+                "SELECT paste_id, title, signature, content, syntax, expire, burn, user_id
              FROM paste_by_id WHERE paste_id = ? LIMIT 1;",
                 (paste_id,),
             )
             .await?
             .into_typed::<PasteById>();
+
+        while let Some(paste) = iter.try_next().await? {
+            return Ok(Some(paste));
+        }
+
+        Ok(None)
+    }
+    async fn get_paste_info_by_id(&self, paste_id: Uuid) -> Result<Option<PasteInfoById>> {
+        let mut iter = self.session
+            .query_iter(
+                "SELECT expire, burn
+             FROM paste_by_id WHERE paste_id = ? LIMIT 1;",
+                (paste_id,),
+            )
+            .await?
+            .into_typed::<PasteInfoById>();
 
         while let Some(paste) = iter.try_next().await? {
             return Ok(Some(paste));
@@ -117,7 +133,7 @@ impl PasteDbOperations for ScyllaDbOperations {
     }
     async fn insert_paste(&self, paste: &PasteById, duration: i32) -> Result<()> {
         let query = "INSERT INTO paste_by_id (
-        paste_id, title, content, syntax, password, expire, burn, user_id
+        paste_id, title, signature, content, syntax, expire, burn, user_id
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?) USING TTL ?";
 
         self.session
@@ -126,9 +142,9 @@ impl PasteDbOperations for ScyllaDbOperations {
                 (
                     paste.paste_id,
                     &paste.title,
+                    &paste.signature,
                     &paste.content,
                     &paste.syntax,
-                    &paste.password,
                     paste.expire,
                     paste.burn,
                     paste.user_id,
@@ -213,4 +229,5 @@ impl PasteDbOperations for ScyllaDbOperations {
             .context("Failed to execute batch").expect("TODO: panic message");
         Ok(())
     }
+
 }

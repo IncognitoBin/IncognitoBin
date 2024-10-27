@@ -4,10 +4,10 @@ import { NewUserResponse } from '../models/User/Response/NewUserResponse';
 import { UserLoginResponse } from '../models/User/Response/UserLoginResponse';
 
 
-// Replace this URL with your actual backend API URL
-const API_BASE_URL = 'http://localhost:8181/api/user';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/user";
 
 export class UserService {
+
   static async New(): Promise<NewUserResponse> {
     try {
       const response = await axios.get<NewUserResponse>(`${API_BASE_URL}`);
@@ -38,4 +38,15 @@ export class UserService {
       throw error;
     }
   }
+  static setUserToken(value: string): void {
+    const date = new Date();
+    date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
+    const expires = `expires=${date.toUTCString()}`;
+    document.cookie = `token=${value};${expires};path=/`;
+  }
+  static getUserCookie(): string | undefined {
+    var b = document.cookie.match("(^|;)\\s*token\\s*=\\s*([^;]+)");
+    return b ? b.pop() : "";
+  }
+  
 }

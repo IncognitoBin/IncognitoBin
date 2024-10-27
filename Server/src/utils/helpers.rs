@@ -1,5 +1,6 @@
 use actix_web::HttpRequest;
 use anyhow::Context;
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use crate::config::settings::Config;
 use crate::db::paste_db_operations::PasteDbOperations;
@@ -30,4 +31,18 @@ pub async fn extract_user_token<'a>(req: &'a HttpRequest, config: &Config) -> Op
         }
     }
     None
+}
+pub fn time_difference_in_seconds(date: Option<DateTime<Utc>>) -> Option<i64> {
+    match date {
+        Some(date) => {
+            let now = Utc::now();
+            let duration = date.signed_duration_since(now);
+            if duration.num_seconds() >= 0 {
+                Some(duration.num_seconds())
+            } else {
+                Some(0)
+            }
+        }
+        None => None,
+    }
 }
