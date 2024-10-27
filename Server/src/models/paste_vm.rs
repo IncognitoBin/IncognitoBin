@@ -23,3 +23,14 @@ pub struct PasteResponse {
     pub(crate) expire: Option<i64>,
     pub(crate) views: i64,
 }
+#[derive(Serialize)]
+pub struct GetPasteGenInfo {
+    pub(crate) id: Uuid,
+    pub(crate) burn: bool,
+    pub(crate) expire: Option<i64>,
+    pub(crate) views: i64,
+}
+#[derive(Serialize, Deserialize)]
+pub struct PasteIds {
+    pub(crate) paste_ids: Vec<Uuid>,
+}

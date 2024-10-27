@@ -2,7 +2,7 @@
 use crate::Config;
 use crate::db::paste_db_operations::PasteDbOperations;
 use crate::db::scylla_db_operations::{ScyllaDbOperations};
-use crate::models::paste_vm::{CreatePasteRequest, CreatedPasteResponse, PasteResponse};
+use crate::models::paste_vm::{CreatePasteRequest, CreatedPasteResponse, GetPasteGenInfo, PasteResponse};
 use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::{Duration, Utc};
 use serde::Serialize;
@@ -66,9 +66,6 @@ async fn get_paste(
                     }
                 }
             }
-
-
-
             HttpResponse::Ok().json(response)
         }
         Ok(None) => HttpResponse::NotFound().finish(), // Paste not found
@@ -83,16 +80,59 @@ async fn get_user_pastes(
     config: web::Data<Config>,
     db: web::Data<ScyllaDbOperations>,
 ) -> impl Responder {
+    // User Id extraction with error handling
     let user_id = match extract_user_id(&req, &db, &config).await {
         Some(id) => id,
-        None => {return HttpResponse::Unauthorized().finish()}
+        None => {
+            return HttpResponse::Unauthorized().body("Unauthorized: Invalid user credentials")
+        }
     };
+
+    // Fetch all paste IDs for the user
     let pastes = match db.get_pastes_by_userid(user_id).await {
-        Ok(pastes_uuid) => {pastes_uuid}
-        Err(_) => {return HttpResponse::InternalServerError().finish()}
+        Ok(pastes_uuid) => pastes_uuid,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .body("Internal server error while retrieving pastes")
+        }
     };
-    HttpResponse::Ok().json(pastes)
+
+    // Gather information for each paste, with improved error handling
+    let mut user_pastes: Vec<GetPasteGenInfo> = Vec::new();
+    for uuid in &pastes {
+        let paste = match db.get_paste_info_by_id(uuid.clone()).await {
+            Ok(Some(paste_info)) => paste_info,
+            Ok(None) => {
+                return HttpResponse::NotFound().body("Paste not found")
+            }
+            Err(_) => {
+                return HttpResponse::InternalServerError()
+                    .body("Error retrieving paste information")
+            }
+        };
+
+        let views = match db.get_view_count_by_paste_id(uuid.clone()).await {
+            Ok(Some(views)) => views.0,
+            Ok(None) => 0i64, // No views recorded, default to 0
+            Err(_) => {
+                return HttpResponse::InternalServerError()
+                    .body("Error retrieving view count")
+            }
+        };
+
+        let new_paste_info = GetPasteGenInfo {
+            id: uuid.clone(),
+            burn: paste.burn,
+            expire: time_difference_in_seconds(paste.expire),
+            views,
+        };
+        user_pastes.push(new_paste_info);
+    }
+
+    // Return the JSON response with collected paste data
+    HttpResponse::Ok().json(user_pastes)
 }
+
 #[post("/paste")]
 async fn create_paste(
     req: HttpRequest,
@@ -103,11 +143,11 @@ async fn create_paste(
 ) -> impl Responder {
     // Title
     if paste_data.title.len() > config.max_title_length as usize {
-        return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Title must not exceed {} characters", config.max_title_length).to_string() });
+        return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Title must not exceed {} bytes", config.max_title_length).to_string() });
     }
     // Content Size
     if paste_data.content.len() > config.max_content_kb as usize || paste_data.content.len() < 24 {
-        return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Content size must be between 24 AND {} bytes", config.max_content_kb).to_string() });
+        return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Content size must be between 24 and {} bytes", config.max_content_kb).to_string() });
     }
     let mut duration = 0;
     // Expiration
@@ -138,7 +178,7 @@ async fn create_paste(
     }
     // Syntax
     if paste_data.syntax.is_some() && paste_data.syntax.clone().unwrap_or("".to_string()).len() > config.max_syntax_length as usize {
-        return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Syntax must not exceed {} characters", config.max_syntax_length).to_string() });
+        return HttpResponse::BadRequest().json(ErrorResponse { error: format!("Syntax must not exceed {} bytes", config.max_syntax_length).to_string() });
     }
     // Get Unique ID
     let mut con = match redis_con.redis_client.get_connection() {

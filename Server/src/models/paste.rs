@@ -14,3 +14,8 @@ pub(crate) struct PasteById {
     pub(crate) burn: bool,
     pub(crate) user_id: Option<Uuid>,
 }
+#[derive(Debug, Serialize, Deserialize,FromRow)]
+pub(crate) struct PasteInfoById {
+    pub(crate) expire: Option<DateTime<Utc>>,
+    pub(crate) burn: bool,
+}
