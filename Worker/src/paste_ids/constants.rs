@@ -1,1 +1,0 @@
-pub const SPLIT_SIZE: u16 = 10000;

@@ -5,7 +5,5 @@ COPY src ./src
 RUN cargo build --release
 FROM debian:stable-slim
 WORKDIR /app
-COPY --from=build /app/target/release/x_snippet_worker .
-EXPOSE 8080
-# TODO: ENV_VAR for Split_Size
-CMD ["./x_snippet_worker"]
+COPY --from=build /app/target/release/IncognitoBin_worker .
+CMD ["./IncognitoBin_worker"]

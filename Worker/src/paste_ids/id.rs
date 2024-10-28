@@ -1,5 +1,5 @@
 use chrono::{Utc};
-use crate::paste_ids::constants::SPLIT_SIZE;
+use crate::config::settings::{get_split_size};
 use crate::paste_ids::manager::{MANAGER};
 
 fn get_id_from_expired_id() -> u128 {
@@ -15,7 +15,7 @@ fn get_id_from_expired_id() -> u128 {
 fn increment_index() {
     let mut manager = MANAGER.write().unwrap();
     manager.index += 1;
-    if manager.index >= SPLIT_SIZE {
+    if manager.index >= get_split_size() {
         manager.index = 0;
     }
 }
@@ -28,9 +28,9 @@ fn update_chunk_start(index: u16) {
             chunk.size += 1;
             let start: u128 = 62_u128.pow(chunk.size as u32 - 1);
             let end: u128 = 62_u128.pow(chunk.size as u32) - 1;
-            let chunk_size: u128 = (end - start) / SPLIT_SIZE as u128;
+            let chunk_size: u128 = (end - start) / get_split_size() as u128;
             chunk.start = start + chunk_size * chunk.size as u128;
-            chunk.end = if chunk.size as u16 == SPLIT_SIZE - 1 {
+            chunk.end = if chunk.size as u16 == get_split_size() - 1 {
                 end
             } else {
                 start + chunk_size * chunk.size as u128 + chunk_size - 1

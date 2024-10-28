@@ -1,11 +1,14 @@
+use std::env;
 use std::sync::Arc;
 use std::time::Duration;
+use dotenv::dotenv;
 use scylla::{Session, SessionBuilder};
 
 mod paste_ids;
 mod db;
 mod utils;
 mod handlers;
+mod config;
 
 use crate::db::db_operations_imlp::ScyllaDbOperations;
 use crate::handlers::paste_ids::pastes_ids_handler;
@@ -13,13 +16,16 @@ use crate::handlers::user_auth::{ids_queue_handler, tokens_queue_handler};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
+    let scylla_host: String = env::var("SCYLLA_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let redis_host: String = env::var("REDIS_HOST").unwrap_or_else(|_| "redis://127.0.0.1/".to_string());
     let session: Session = SessionBuilder::new()
-        .known_node("127.0.0.1")
+        .known_node(scylla_host)
         .build()
         .await
         .expect("Failed to connect to ScyllaDB");
     let session = Arc::new(session);
-    let client = Arc::new(redis::Client::open("redis://127.0.0.1/")?);
+    let client = Arc::new(redis::Client::open(redis_host)?);
     paste_ids::load()?;
     println!("Data loaded successfully!");
 
