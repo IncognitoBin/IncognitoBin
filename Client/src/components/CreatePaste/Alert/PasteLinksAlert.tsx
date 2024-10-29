@@ -45,9 +45,9 @@ const PasteLinksAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
               </div>
               <Separator orientation="vertical" />
               <div className="text-neutral-400 w-full overflow-hidden h-6 whitespace-nowrap">
-                http://localhost:5173/{PasteId}
+              {window.location.origin}/{PasteId}
               </div>
-              <Button variant="secondary" onClick={()=>copyToClipBoard(`http://localhost:5173/${PasteId}`,0)}>{CopiedIndex!=0?"Copy":"Copied"}</Button>
+              <Button variant="secondary" onClick={()=>copyToClipBoard(`${window.location.origin}/${PasteId}`,0)}>{CopiedIndex!=0?"Copy":"Copied"}</Button>
             </div>
 
             {SecretKey != "" ? (
@@ -61,9 +61,9 @@ const PasteLinksAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
                   </div>
                   <Separator orientation="vertical" />
                   <div className="text-neutral-400 w-full overflow-hidden h-6 whitespace-nowrap">
-                    http://localhost:5173/{PasteId}/{SecretKey}
+                  {window.location.origin}/{PasteId}/{SecretKey}
                   </div>
-                  <Button variant="secondary" onClick={()=>copyToClipBoard(`http://localhost:5173/${PasteId}/${SecretKey}`,1)}>{CopiedIndex!=1?"Copy":"Copied"}</Button>
+                  <Button variant="secondary" onClick={()=>copyToClipBoard(`${window.location.origin}/${PasteId}/${SecretKey}`,1)}>{CopiedIndex!=1?"Copy":"Copied"}</Button>
                 </div>
               </>
             ) : (
@@ -80,9 +80,9 @@ const PasteLinksAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
                   </div>
                   <Separator orientation="vertical" />
                   <div className="text-neutral-400 w-full overflow-hidden h-6 whitespace-nowrap">
-                    http://localhost:5173/{PasteId}/{SecretKey!=""?SecretKey:DEFAULT_KEY}/{IvKey}
+                  {window.location.origin}/{PasteId}/{SecretKey!=""?SecretKey:DEFAULT_KEY}/{IvKey}
                   </div>
-                  <Button variant="secondary" onClick={()=>copyToClipBoard(`http://localhost:5173/${PasteId}/${SecretKey!=""?SecretKey:DEFAULT_KEY}/${IvKey}`,2)}>{CopiedIndex!=2?"Copy":"Copied"}</Button>
+                  <Button variant="secondary" onClick={()=>copyToClipBoard(`${window.location.origin}/${PasteId}/${SecretKey!=""?SecretKey:DEFAULT_KEY}/${IvKey}`,2)}>{CopiedIndex!=2?"Copy":"Copied"}</Button>
                 </div>
               </>
             ) : (
