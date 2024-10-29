@@ -5,6 +5,7 @@ COPY src ./src
 RUN cargo build --release
 FROM debian:stable-slim
 WORKDIR /app
-COPY --from=build /app/target/release/x_snippet_server .
-EXPOSE 8080
-CMD ["./x_snippet_server"]
+COPY resources ./resources
+COPY --from=build /app/target/release/IncognitoBin_server .
+EXPOSE 8181
+CMD ["./IncognitoBin_server"]
