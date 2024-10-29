@@ -1,3 +1,4 @@
+use std::env;
 use std::sync::Arc;
 use actix_web::{web, App, HttpServer};
 use scylla::{Session, SessionBuilder};
@@ -29,9 +30,12 @@ async fn main() -> std::io::Result<()> {
             std::process::exit(1);
         }
     };
+
     // Scylla Connection
+
+    let scylla_host: String = env::var("SCYLLA_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let session: Session = SessionBuilder::new()
-        .known_node("127.0.0.1")
+        .known_node(scylla_host)
         .build()
         .await
         .expect("Failed to connect to ScyllaDB");
@@ -43,7 +47,8 @@ async fn main() -> std::io::Result<()> {
     let db_ops = web::Data::new(ScyllaDbOperations::new(Arc::new(session).clone()));
 
     // Redis Connection
-    let redis_client = Arc::new(redis::Client::open("redis://127.0.0.1/")
+    let redis_host: String = env::var("REDIS_HOST").unwrap_or_else(|_| "redis://127.0.0.1/".to_string());
+    let redis_client = Arc::new(redis::Client::open(redis_host)
         .expect("Failed to open Redis client"));
     let redis_app_state = web::Data::new(RedisAppState {
         redis_client: redis_client.clone(),
@@ -53,7 +58,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(
-                Cors::permissive()
+                Cors::permissive() // This allows all origins, methods, and headers
             )
             .app_data(db_ops.clone())
             .app_data(web::Data::new(config.clone()).clone())

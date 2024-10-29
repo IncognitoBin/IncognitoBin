@@ -3,7 +3,6 @@ import { UserLoginRequest } from '../models/User/Request/UserLoginRequest';
 import { NewUserResponse } from '../models/User/Response/NewUserResponse';
 import { UserLoginResponse } from '../models/User/Response/UserLoginResponse';
 
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL + "/api/user";
 
 export class UserService {

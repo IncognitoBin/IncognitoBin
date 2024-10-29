@@ -6,12 +6,13 @@ use crate::db::redis_operations::{queue_length, read_all};
 use crate::utils::helpers::{generate_token, random_id};
 use tokio::time::sleep;
 use uuid::Uuid;
+use crate::config::settings::{get_users_id_size, get_users_token_size};
 
 pub async fn tokens_queue_handler(mut redis_con: Connection, db_ops: ScyllaDbOperations) {
     loop {
         let length = queue_length(&mut redis_con, "users_tokens").expect("Redis: Failed to get queue count");
-        if length < 100_000 {
-            add_users_tokens_enqueue(&mut redis_con, "users_tokens", 100_000 - length, &db_ops)
+        if length < get_users_token_size() {
+            add_users_tokens_enqueue(&mut redis_con, "users_tokens", get_users_token_size() - length, &db_ops)
                 .await
                 .expect("Can't Insert To Tokens Queue");
         }
@@ -22,8 +23,8 @@ pub async fn tokens_queue_handler(mut redis_con: Connection, db_ops: ScyllaDbOpe
 pub async fn ids_queue_handler(mut redis_con: Connection, db_ops: ScyllaDbOperations) {
     loop {
         let length = queue_length(&mut redis_con, "users_ids").expect("Redis: Failed to get queue count");
-        if length < 100_000 {
-            add_users_ids_enqueue(&mut redis_con, "users_ids", 100_000 - length, &db_ops)
+        if length < get_users_id_size() {
+            add_users_ids_enqueue(&mut redis_con, "users_ids", get_users_id_size() - length, &db_ops)
                 .await
                 .expect("Can't Insert To Ids Queue");
         }
