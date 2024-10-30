@@ -6,11 +6,16 @@ import { Button } from "@/components/ui/button";
 
 const Header = () => {
   const navigate = useNavigate();
-  const logoutHandler = () => {
-    UserService.setUserToken("");
-    setConnected(false);
-    setConnected(false);
-    navigate("/Auth");
+  const logoutHandler = async () => {
+    try {
+      const userToken = UserService.getUserCookie() || "";
+      await UserService.LogOut(userToken);
+      UserService.setUserToken("");
+      setConnected(false);
+      navigate("/Auth");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   const [connected, setConnected] = useState(false);
