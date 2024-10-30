@@ -9,6 +9,7 @@
 - 🛡️ **End-to-End Encryption with AES-256**: Data is encrypted client-side using AES-256, a robust encryption standard, ensuring that only the user can access their information. The server remains unaware of the data's content (zero-server knowledge).
 - 🎭 **Anonymous Account System**: Users are assigned a unique account number upon sign-up, which they use for logging in, maintaining full anonymity and avoiding the need for personal information.
 - 🔐 **Zero-Knowledge Architecture**: Since all data is encrypted on the client side, **even IncognitoBin administrators or the project owner cannot view stored data**.
+- 🖍️ **Syntax Highlighting**: IncognitoBin supports syntax highlighting for most programming languages, making code snippets easy to read and visually appealing.
 - ⚡ **Scalable Infrastructure**: IncognitoBin leverages Rust, ScyllaDB, and Redis, ensuring it can handle high traffic and maintain low latency.
 - 🌟 **Open Source**: As an open-source project, IncognitoBin encourages transparency and community involvement in development.
 - ⏳ **Automatic Paste Expiry**: Set custom expiration times for your pastes, after which they are permanently deleted from the system.
