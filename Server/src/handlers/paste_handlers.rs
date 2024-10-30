@@ -187,7 +187,7 @@ async fn create_paste(
     };
     let text_paste_id_num = match dequeue(&mut con, "paste_ids") {
         Ok(Some(id)) => id,
-        Ok(None) => return HttpResponse::NotFound().body("No IDs in queue"),
+        Ok(None) => return HttpResponse::InternalServerError().body("No IDs in queue"),
         Err(_) => return HttpResponse::InternalServerError().finish(),
     };
     let paste_id = number_text_to_uuid(text_paste_id_num);
