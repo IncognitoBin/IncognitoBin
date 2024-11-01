@@ -17,10 +17,10 @@ const CreatePasteBody: React.FC<CreatePasteBodyProps> = ({
   const [tap, setTap] = useState(0);
 
   return (
-    <div>
+    <div className="w-screen md:w-[796px] 2xl:w-[1468.8px]">
       <div className="bg-[var(--chal-item-bg)] rounded-xl border-[1px] border-slate-500/50 ">
         <ContentHeader CreateAction={Create} setTap={setTap} tap={tap} />
-        <div className="w-[796px] 2xl:w-[1468.8px]">
+        <div className="">
           <ContentArea
             Syntax={Syntax}
             Content={Content}
