@@ -33,7 +33,7 @@ const PasteLinksAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
         <AlertDialogTrigger asChild>
           <Button className="hidden" ref={ref}></Button>
         </AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogContent className="p-5 px-1.5 rounded-lg sm:p-[1.5rem] overflow-auto">
           <AlertDialogHeader>
             <AlertDialogTitle>Copy Your Paste links</AlertDialogTitle>
             <AlertDialogDescription>
