@@ -22,7 +22,7 @@ const AuthSection: React.FC<AuthSectionProps> = ({
   handleAccountNumberChange,
 }) => {
   return (
-    <div className="pt-32 ">
+    <div className="pt-16 sm:pt-32 ">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px] border-[1px] p-12 rounded-md">
         <div className="flex flex-col space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">

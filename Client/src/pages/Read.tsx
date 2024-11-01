@@ -86,7 +86,7 @@ const ReadPaste = () => {
       {exist ? (
         DecryptedPasteData ? (
           <div className="m-4 flex justify-center">
-            <div className="min-w-[796px] 2xl:max-w-[1468.8px] w-full">
+            <div className="2xl:max-w-[1468.8px] w-full">
               <ReadPasteHeader
                 title={
                   DecryptedPasteData.title != ""
