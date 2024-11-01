@@ -12,25 +12,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { forwardRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {  TriangleAlert } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 interface PasteLinksAlertProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   UserId: string;
   Open: boolean;
-  OnDoneClick: ()=> void;
+  OnDoneClick: () => void;
 }
 const downloadTextFile = (content: string) => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'IncognitoBin_account.txt';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "IncognitoBin_account.txt";
+  link.click();
+  URL.revokeObjectURL(url);
+};
 const NewUserAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
-  ({ UserId, Open ,OnDoneClick }) => {
+  ({ UserId, Open, OnDoneClick }) => {
     const [CopiedIndex, setCopiedIndex] = useState(-1);
     const copyToClipBoard = (Text: string, Index: number) => {
       setCopiedIndex(Index);
@@ -41,13 +41,13 @@ const NewUserAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
         <AlertDialogTrigger asChild>
           <Button className="hidden"></Button>
         </AlertDialogTrigger>
-        <AlertDialogContent className="max-w-[650px]">
+        <AlertDialogContent className="max-w-[650px] p-5 px-1.5 rounded-lg sm:p-[1.5rem]">
           <AlertDialogHeader>
             <AlertDialogTitle>Account Created !</AlertDialogTitle>
             <AlertDialogDescription>
               Congrats! Here's your account number:
             </AlertDialogDescription>
-            <div className="flex gap-1 justify-between items-center bg-slate-900 w-[600px] p-0.5 rounded-md pl-3">
+            <div className="flex gap-1 justify-between items-center bg-slate-900 sm:w-[600px] p-0.5 rounded-md pl-3 w-screen">
               <div className="text-neutral-400 w-full overflow-hidden h-6 whitespace-nowrap">
                 {UserId}
               </div>
@@ -72,11 +72,14 @@ const NewUserAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
                 Download
               </Button>
             </div>
+
             <Alert variant={"orange"}>
               <TriangleAlert className="h-4 w-4" />
               <AlertTitle>Notice</AlertTitle>
               <AlertDescription>
-              Don't lose it! It's your only key to access our service — no email, no username. If you lose it, you won’t be able to recover your account.
+                Don't lose it! It's your only key to access our service — no
+                email, no username. If you lose it, you won’t be able to recover
+                your account.
               </AlertDescription>
             </Alert>
           </AlertDialogHeader>

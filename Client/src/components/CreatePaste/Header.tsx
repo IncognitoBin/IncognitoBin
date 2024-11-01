@@ -16,33 +16,33 @@ interface CreatePasteHeaderProps {
   setTitle: (event: string) => void;
   setExpiration: (event: number) => void;
 }
-const CreatePasteHeader: React.FC<CreatePasteHeaderProps> = ({ 
-  burn, 
-  setBurn, 
-  syntax, 
-  setSyntax, 
-  secretkey, 
-  setSecretKey, 
-  ivkey, 
-  setIvKey, 
-  title, 
-  setTitle, 
-  setExpiration
+const CreatePasteHeader: React.FC<CreatePasteHeaderProps> = ({
+  burn,
+  setBurn,
+  syntax,
+  setSyntax,
+  secretkey,
+  setSecretKey,
+  ivkey,
+  setIvKey,
+  title,
+  setTitle,
+  setExpiration,
 }) => {
   return (
-      <div className="flex flex-col 2xl:flex-row justify-between 2xl:items-center items-start h-36 2xl:h-[102px] pb-4">
-        <div className="flex flex-row justify-between 2xl:w-[670px] gap-[4.5rem] 2xl:gap-0">
-          <InputWithLabel
-            InputLabelText="Title "
-            InputPlaceHolder="Your Title (Optional)"
-            ToolTipText="Paste Title"
-            InputValue={title}
-            setInputText={setTitle}
-          />
-          <SyntaxBox value={syntax} setValue={setSyntax} />
-          <ExpireWithLabel setExpiration={setExpiration} />
-        </div>
-        <div className="flex flex-row justify-between w-[776.8px] 2xl:ml-5 ml-0">
+    <div className="flex w-screen md:w-auto flex-col 2xl:flex-row gap-3 justify-between 2xl:items-center items-start 2xl:h-[102px] pb-4">
+      <div className="flex flex-col pl-3 md:pl-0 gap-5  md:flex-row justify-between md:w-[670px] md:gap-[4.5rem] 2xl:gap-0">
+        <InputWithLabel
+          InputLabelText="Title "
+          InputPlaceHolder="Your Title (Optional)"
+          ToolTipText="Paste Title"
+          InputValue={title}
+          setInputText={setTitle}
+        />
+        <SyntaxBox value={syntax} setValue={setSyntax} />
+        <ExpireWithLabel setExpiration={setExpiration} />
+      </div>
+      <div className="flex flex-col pl-3 md:pl-0 gap-5 md:gap-0 md:flex-row justify-between md:w-[776.8px] w-screen 2xl:ml-5 ml-0">
           <InputWithGenerator
             InputLabelText="Secret Key"
             InputPlaceHolder="Private Secret Key"
@@ -59,11 +59,11 @@ const CreatePasteHeader: React.FC<CreatePasteHeaderProps> = ({
             Secret={ivkey}
             setSecretKey={setIvKey}
           />
-          <div className="mt-7">
+          <div className="mt-0 md:mt-7">
               <BurnAfterReadSwitch burn={burn} onBurnClick={()=>setBurn(burn?false:true)} />
           </div>
         </div>
-      </div>
+    </div>
   );
 };
 export default CreatePasteHeader;
