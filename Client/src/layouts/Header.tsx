@@ -54,13 +54,13 @@ const Header = () => {
           {connected ? (
             <>
               <Link
-                className="font-semibold text-slate-200 cursor-pointer hover:underline"
+                className="text-sm sm:text-base font-semibold text-slate-200 cursor-pointer hover:underline"
                 to="/Me"
               >
                 My Pastes
               </Link>
               <div
-                className="font-semibold text-slate-200 cursor-pointer hover:underline"
+                className="text-sm sm:text-base font-semibold text-slate-200 cursor-pointer hover:underline"
                 onClick={logoutHandler}
               >
                 Log Out
