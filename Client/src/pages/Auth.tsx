@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserService } from "@/services/UserService";
 import { NewUserResponse } from "@/models/User/Response/NewUserResponse";
 import { bigIntToUUID, uuidToBigInt } from "@/utils/bigint-uuid";
@@ -7,22 +7,29 @@ import NewUserAlert from "@/components/Auth/NewUserAlert";
 import { toast } from "@/hooks/use-toast";
 import { UserLoginRequest } from "@/models/User/Request/UserLoginRequest";
 import { UserLoginResponse } from "@/models/User/Response/UserLoginResponse";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AuthSection from "@/components/Auth/AuthSection";
 
 const AuthPage = () => {
+  const [accountNumber, setAccountNumber] = useState("");
+  const { id } = useParams();
+  useEffect(() => {
+    if(id){
+      Login(id);
+    }
+  }, []);
+  
   const [isLogin, setisLogin] = React.useState<boolean>(false);
   const [isCreate, setisCreate] = React.useState<boolean>(false);
   const [OpenAlert, setOpenAlert] = React.useState<boolean>(false);
-  const [accountNumber, setAccountNumber] = useState("");
   
   const navigate = useNavigate();
 
-  async function onLogin() {
+  async function Login(accNumber:string) {
     setisLogin(true);
     try {
       const UserLognReq: UserLoginRequest = {
-        id: bigIntToUUID(BigInt(accountNumber.replace(/\s+/g, ""))),
+        id: bigIntToUUID(BigInt(accNumber.replace(/\s+/g, ""))),
       };
       const NewUserRes: UserLoginResponse | null = await UserService.Login(UserLognReq);
   
@@ -50,6 +57,10 @@ const AuthPage = () => {
     } finally {
       setisLogin(false);
     }
+  }
+
+  async function onLoginClick() {
+    Login(accountNumber);
   }
 
   async function onCreate() {
@@ -96,7 +107,7 @@ const AuthPage = () => {
         Open={OpenAlert}
         OnDoneClick={OnDoneClick}
       />
-      <AuthSection onLoginClick={onLogin} onCreateClick={onCreate} isLogin={isLogin} isCreate={isCreate} accountNumber={accountNumber} handleAccountNumberChange={handleNumberChange}/>
+      <AuthSection onLoginClick={onLoginClick} onCreateClick={onCreate} isLogin={isLogin} isCreate={isCreate} accountNumber={accountNumber} handleAccountNumberChange={handleNumberChange}/>
     </>
   );
 };

@@ -21,6 +21,7 @@ function App() {
           
           <Route path="/:id/:key/:iv" element={<ReadPaste />} />
           <Route path="/Auth" element={<AuthPage />} />
+          <Route path="/Auth/:id" element={<AuthPage />} />
           <Route path="/Me" element={<MyPastes />} />
           
         </Routes>
