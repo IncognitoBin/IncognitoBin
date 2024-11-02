@@ -72,7 +72,25 @@ const NewUserAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
                 Download
               </Button>
             </div>
-
+            <AlertDialogDescription>Quick Login Link</AlertDialogDescription>
+            <div className="flex gap-1 justify-between items-center bg-slate-900 sm:w-[600px] p-0.5 rounded-md pl-3 w-screen">
+              <div className="text-neutral-400 w-full overflow-hidden h-6 whitespace-nowrap">
+              {window.location.origin}/Auth/{UserId.replace(/\s+/g, "")}
+              </div>
+              <Button
+                variant="secondary"
+                onClick={() => copyToClipBoard(`${window.location.origin}/Auth/${UserId.replace(/\s+/g, "")}`, 1)}
+                className="flex gap-2 "
+              >
+                {CopiedIndex != 1 ? (
+                  <Icons.clipboard className="w-5 [&>path]:fill-current" />
+                ) : (
+                  <Icons.done className="w-4 [&>path]:fill-current" />
+                )}
+                {CopiedIndex != 1 ? "Copy" : "Copied"}
+              </Button>
+            </div>
+            
             <Alert variant={"orange"}>
               <TriangleAlert className="h-4 w-4" />
               <AlertTitle>Notice</AlertTitle>
