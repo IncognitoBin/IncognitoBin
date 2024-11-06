@@ -1,0 +1,85 @@
+networks:
+  incognito_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+services:
+  scylladb:
+    image: scylladb/scylla:latest
+    container_name: scylladb
+    networks:
+      incognito_network:
+        ipv4_address: 172.28.35.89
+    ports:
+      - "9042:9042"
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      incognito_network:
+        ipv4_address: 172.28.120.53
+    ports:
+      - "6379:6379"
+    restart: always
+
+  server:
+    image: incognitobin/server
+    container_name: incognitobin_server
+    environment:
+      MAX_TITLE_LENGTH: 64
+      MAX_CONTENT_KB: 10000
+      MAX_SYNTAX_LENGTH: 64
+      MIN_PASTE_DURATION: 60
+      MAX_PASTE_DURATION: 31556952
+      TOKEN_SIZE: 150
+      SCYLLA_HOST: 172.28.35.89
+      REDIS_HOST: redis://172.28.120.53/
+    networks:
+      incognito_network:
+        ipv4_address: 172.28.65.101
+    ports:
+      - "7979:8181"
+    depends_on:
+      - scylladb
+      - redis
+    restart: always
+    command: /bin/sh -c "sleep 30 && ./IncognitoBin_server"
+
+  worker:
+    image: incognitobin/worker
+    container_name: incognitobin_worker
+    networks:
+      incognito_network:
+        ipv4_address: 172.28.245.76
+    environment:
+      USERS_TOKEN_SIZE: 10000
+      USERS_ID_SIZE: 10000
+      PASTES_ID_SIZE: 500000
+      SPLIT_SIZE: 10000
+      SCYLLA_HOST: 172.28.35.89
+      REDIS_HOST: redis://172.28.120.53/
+    depends_on:
+      - scylladb
+      - redis
+      - server
+    restart: always
+    command: /bin/sh -c "sleep 40 && ./IncognitoBin_worker"
+
+
+  client:
+    image: incognitobin/client
+    container_name: incognitobin_client
+    environment:
+      API_URL: "http://localhost:7979"
+    networks:
+      incognito_network:
+        ipv4_address: 172.28.180.203
+    ports:
+      - "8008:80"
+    depends_on:
+      - server
+    restart: always

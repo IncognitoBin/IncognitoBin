@@ -1,15 +1,15 @@
-use std::env;
-use std::sync::Arc;
-use actix_web::{web, App, HttpServer};
-use scylla::{Session, SessionBuilder};
 use crate::config::settings::Config;
 use actix_cors::Cors;
+use actix_web::{web, App, HttpServer};
+use scylla::{CachingSession, Session, SessionBuilder};
+use std::env;
+use std::sync::Arc;
 
+mod config;
 mod db;
+mod handlers;
 mod models;
 mod routes;
-mod handlers;
-mod config;
 mod utils;
 
 use crate::db::init::initialize_schema;
@@ -44,12 +44,15 @@ async fn main() -> std::io::Result<()> {
         eprintln!("Failed to initialize schema: {:?}", err);
     }
     // Scylla db Operations Handler
-    let db_ops = web::Data::new(ScyllaDbOperations::new(Arc::new(session).clone()));
+    let db_ops = web::Data::new(ScyllaDbOperations::new(
+        Arc::new(CachingSession::from(session, 32)).clone(),
+    ));
 
     // Redis Connection
-    let redis_host: String = env::var("REDIS_HOST").unwrap_or_else(|_| "redis://127.0.0.1/".to_string());
-    let redis_client = Arc::new(redis::Client::open(redis_host)
-        .expect("Failed to open Redis client"));
+    let redis_host: String =
+        env::var("REDIS_HOST").unwrap_or_else(|_| "redis://127.0.0.1/".to_string());
+    let redis_client =
+        Arc::new(redis::Client::open(redis_host).expect("Failed to open Redis client"));
     let redis_app_state = web::Data::new(RedisAppState {
         redis_client: redis_client.clone(),
     });
@@ -58,14 +61,14 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(
-                Cors::permissive() // This allows all origins, methods, and headers
+                Cors::permissive(), // This allows all origins, methods, and headers
             )
             .app_data(db_ops.clone())
             .app_data(web::Data::new(config.clone()).clone())
             .app_data(redis_app_state.clone())
             .configure(api::configure)
     })
-        .bind(("0.0.0.0", 8181))?
-        .run()
-        .await
+    .bind(("0.0.0.0", 8181))?
+    .run()
+    .await
 }
