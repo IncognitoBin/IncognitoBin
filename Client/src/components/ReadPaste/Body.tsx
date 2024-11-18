@@ -33,7 +33,7 @@ const ReadPasteBody : React.FC<ReadPasteBodyProps> = ({ syntax , content }) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div>
+                  <div onClick={()=> {navigator.clipboard.writeText(content)}}>
                     <Icons.clipboard className="opacity-70 w-[21px] px-0.5 py-1 my-0.5 cursor-pointer hover:bg-gray-500 rounded [&>path]:fill-current" />
                   </div>
                 </TooltipTrigger>
