@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { DEFAULT_KEY } from "@/utils/crypto";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 interface PasteLinksAlertProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   SecretKey: string;
@@ -28,6 +28,11 @@ const PasteLinksAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
         setCopiedIndex(Index);
         navigator.clipboard.writeText(Text);
       };
+
+      useEffect(() => {
+        setCopiedIndex(-1);
+      }, [PasteId]);
+      
     return (
         <AlertDialog>
         <AlertDialogTrigger asChild>

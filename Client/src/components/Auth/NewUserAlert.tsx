@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
 
@@ -36,6 +36,11 @@ const NewUserAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
       setCopiedIndex(Index);
       navigator.clipboard.writeText(Text);
     };
+    
+    useEffect(() => {
+      setCopiedIndex(-1);
+    }, [UserId]);
+
     return (
       <AlertDialog open={Open}>
         <AlertDialogTrigger asChild>
