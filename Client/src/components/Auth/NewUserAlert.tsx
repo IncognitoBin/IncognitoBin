@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { forwardRef, useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlert } from "lucide-react";
+import { downloadFile } from "@/utils/downloadFile";
 
 interface PasteLinksAlertProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -20,15 +21,6 @@ interface PasteLinksAlertProps
   Open: boolean;
   OnDoneClick: () => void;
 }
-const downloadTextFile = (content: string) => {
-  const blob = new Blob([content], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "IncognitoBin_account.txt";
-  link.click();
-  URL.revokeObjectURL(url);
-};
 const NewUserAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
   ({ UserId, Open, OnDoneClick }) => {
     const [CopiedIndex, setCopiedIndex] = useState(-1);
@@ -70,7 +62,7 @@ const NewUserAlert = forwardRef<HTMLButtonElement, PasteLinksAlertProps>(
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => downloadTextFile(`${UserId}`)}
+                onClick={() => downloadFile("IncognitoBin_account.txt",`${UserId}`)}
                 className="flex gap-2 "
               >
                 <Icons.download className="w-5 [&>path]:fill-current" />
