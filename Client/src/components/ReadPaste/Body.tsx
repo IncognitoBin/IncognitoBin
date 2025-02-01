@@ -11,11 +11,13 @@ import {
   } from "@/components/ui/tooltip";
   import { Icons } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { downloadFile } from "@/utils/downloadFile";
 interface ReadPasteBodyProps {
     syntax:string,
-    content:string
+    content:string,
+    PasteId:string
 }
-const ReadPasteBody : React.FC<ReadPasteBodyProps> = ({ syntax , content }) => {
+const ReadPasteBody : React.FC<ReadPasteBodyProps> = ({ syntax , content , PasteId }) => {
     const customStyle = {
         margin: "0px",
         padding: "10px 0px 10px 10px",
@@ -30,6 +32,20 @@ const ReadPasteBody : React.FC<ReadPasteBodyProps> = ({ syntax , content }) => {
               {" "}
               {syntax.charAt(0).toUpperCase() + syntax.slice(1)}
             </div>
+            <div className="flex gap-1">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div onClick={()=> {downloadFile(PasteId+".txt",content)}}>
+                    <Icons.download className="opacity-70 w-[21px] px-0.5 py-1 my-0.5 cursor-pointer hover:bg-gray-500 rounded [&>path]:fill-current" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs px-2 py-1 opacity-85">
+                  <p>Download Raw File</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -42,6 +58,9 @@ const ReadPasteBody : React.FC<ReadPasteBodyProps> = ({ syntax , content }) => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            </div>
+            
+            
           </div>
           <div className="">
             <span className="block dark:hidden [&>pre]:p-0 [&>pre]:m-0">

@@ -99,6 +99,7 @@ const ReadPaste = () => {
               <ReadPasteBody
                 syntax={DecryptedPasteData.syntax}
                 content={DecryptedPasteData.content}
+                PasteId={id || ""}
               />
             </div>
           </div>
